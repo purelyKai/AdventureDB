@@ -1,5 +1,8 @@
 -- Variables for back‑end code are denoted by a colon (e.g., :variableName).
 
+CREATE DATABASE IF NOT EXISTS AdventureGameDB;
+USE AdventureGameDB;
+
 -- Create Classes table.
 CREATE TABLE Classes (
     class_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
