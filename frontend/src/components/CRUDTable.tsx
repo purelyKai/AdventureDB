@@ -66,18 +66,20 @@ const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => {
     try {
       const response = await axios.post(endpoint, newRecord);
       console.log("Record created:", response.data);
-      // Check that response.data includes a unique id.
+      // Append the new record to state if it contains an id:
       if (response.data && response.data.id) {
-        setData([...data, response.data]); // Add the new record to your state
+        setData([...data, response.data]);
       } else {
-        // If not, call fetchData to update the list.
+        // If not, fetch all data from the backend:
         fetchData();
       }
+      // Clear the create inputs:
       setNewRecord({});
     } catch (error) {
       console.error("Error creating record:", error);
     }
   };
+  
   
   
 
