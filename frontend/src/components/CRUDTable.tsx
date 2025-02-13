@@ -15,10 +15,17 @@ interface CRUDTableProps {
 }
 
 const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => {
+  // useState hook for storing the fetched data (existing records)
   const [data, setData] = useState<any[]>([]);
+  // useState hook for storing the new record's input values
   const [newRecord, setNewRecord] = useState<Record<string, any>>({});
 
-  // Fetch data from the backend
+  // useEffect hook to fetch data when the component mounts or when the endpoint changes
+  useEffect(() => {
+    fetchData();
+  }, [endpoint]);
+
+  // Function to fetch data from the backend
   const fetchData = async () => {
     try {
       const response = await axios.get(endpoint);
@@ -32,11 +39,7 @@ const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => {
     }
   };
 
-  useEffect(() => {
-    fetchData();
-  }, [endpoint]);
-
-  // Delete a record by ID
+  // Delete a record by its id
   const handleDelete = async (recordId: any) => {
     try {
       await axios.delete(`${endpoint}/${recordId}`);
@@ -46,7 +49,7 @@ const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => {
     }
   };
 
-  // Update a record
+  // Update an existing record
   const handleRowUpdate = async (recordId: any, updatedRecord: any) => {
     try {
       await axios.put(`${endpoint}/${recordId}`, updatedRecord);
@@ -56,14 +59,14 @@ const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => {
     }
   };
 
-  // Create a new record
+  // Create a new record and refresh the table
   const handleCreate = async () => {
     console.log("Creating record with:", newRecord);
     try {
-      const response = await axios.post(endpoint, newRecord);
-      console.log("Record created:", response.data);
-      // Clear the create row inputs and solidify the new row
+      await axios.post(endpoint, newRecord);
+      // Clear the create row inputs
       setNewRecord({});
+      // Refresh the table so the new record becomes solidified
       fetchData();
     } catch (error) {
       console.error("Error creating record:", error);
@@ -82,7 +85,7 @@ const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => {
       <table className="min-w-full border-collapse">
         <thead>
           <tr>
-            {/* Left header with an X to denote deletion */}
+            {/* Header for the delete column */}
             <th className="border p-2 text-center">
               <span className="text-red-500 font-bold">X</span>
             </th>
@@ -91,11 +94,12 @@ const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => {
                 {field.label}
               </th>
             ))}
+            {/* Header for the update column */}
             <th className="border p-2">Update</th>
           </tr>
         </thead>
         <tbody>
-          {/* Existing record rows */}
+          {/* Render each existing record */}
           {data.map((record) => (
             <tr key={record.id}>
               <td className="border p-2 text-center">
@@ -113,6 +117,7 @@ const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => {
                     value={record[field.name] || ""}
                     onChange={(e) => {
                       const updatedValue = e.target.value;
+                      // Update local state for immediate feedback
                       const newData = data.map((item) =>
                         item.id === record.id
                           ? { ...item, [field.name]: updatedValue }
