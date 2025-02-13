@@ -18,24 +18,25 @@ const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => {
   const [data, setData] = useState<any[]>([]);
   const [newRecord, setNewRecord] = useState<Record<string, any>>({});
 
+  // Fetch data from the backend
   const fetchData = async () => {
     try {
       const response = await axios.get(endpoint);
-      console.log("Fetched data:", response.data); // Check what this prints
-      // If the response is an object with an array property, update accordingly:
-      const records = Array.isArray(response.data) 
-        ? response.data 
-        : response.data.records || []; // adjust "records" to the correct property name
+      console.log("Fetched data:", response.data);
+      const records = Array.isArray(response.data)
+        ? response.data
+        : response.data.records || [];
       setData(records);
     } catch (error) {
       console.error("Error fetching data:", error);
     }
-  };  
+  };
 
   useEffect(() => {
     fetchData();
   }, [endpoint]);
 
+  // Delete a record by ID
   const handleDelete = async (recordId: any) => {
     try {
       await axios.delete(`${endpoint}/${recordId}`);
@@ -45,6 +46,7 @@ const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => {
     }
   };
 
+  // Update a record
   const handleRowUpdate = async (recordId: any, updatedRecord: any) => {
     try {
       await axios.put(`${endpoint}/${recordId}`, updatedRecord);
@@ -54,18 +56,21 @@ const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => {
     }
   };
 
+  // Create a new record
   const handleCreate = async () => {
     console.log("Creating record with:", newRecord);
     try {
       const response = await axios.post(endpoint, newRecord);
       console.log("Record created:", response.data);
-      setNewRecord({}); // Clear the input row
-      fetchData();      // Re-fetch data to update the table
+      // Option 1: If your API returns the new record, you could add it optimistically:
+      // setData([...data, response.data]);
+      // Option 2: Re-fetch the data to ensure the table is up to date:
+      setNewRecord({}); // Clear the create form
+      fetchData();
     } catch (error) {
       console.error("Error creating record:", error);
     }
   };
-  
 
   return (
     <div className="p-4">
@@ -130,6 +135,7 @@ const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => {
               </td>
             </tr>
           ))}
+          {/* Create New Record Row */}
           <tr>
             <td className="border p-2"></td>
             {fields.map((field) => (
