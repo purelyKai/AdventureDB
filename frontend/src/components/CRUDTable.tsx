@@ -57,12 +57,13 @@ const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => {
   const handleCreate = async () => {
     try {
       await axios.post(endpoint, newRecord);
-      setNewRecord({});
-      fetchData();
+      setNewRecord({}); // Clear the form inputs
+      fetchData();      // Re-fetch data from the server to update the table
     } catch (error) {
       console.error("Error creating record:", error);
     }
   };
+  
 
   return (
     <div className="p-4">
