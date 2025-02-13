@@ -38,6 +38,7 @@ const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => {
       console.error("Error fetching data:", error);
     }
   };
+  
 
   // Delete a record by its id
   const handleDelete = async (recordId: any) => {
@@ -65,14 +66,19 @@ const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => {
     try {
       const response = await axios.post(endpoint, newRecord);
       console.log("Record created:", response.data);
-      // Append the new record directly to state:
-      setData([...data, response.data]);
-      // Clear the create row inputs:
+      // Check that response.data includes a unique id.
+      if (response.data && response.data.id) {
+        setData([...data, response.data]); // Add the new record to your state
+      } else {
+        // If not, call fetchData to update the list.
+        fetchData();
+      }
       setNewRecord({});
     } catch (error) {
       console.error("Error creating record:", error);
     }
   };
+  
   
 
   return (
