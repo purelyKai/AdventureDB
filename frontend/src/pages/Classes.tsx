@@ -1,5 +1,5 @@
 import React from "react";
-import CRUDTable from "../CRUDTable";
+import CRUDTable from "../components/CRUDTable";
 
 const classesFields = [
   { name: "name", label: "Class Name", type: "text" },
