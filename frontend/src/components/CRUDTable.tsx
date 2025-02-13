@@ -23,7 +23,6 @@ const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => {
     try {
       const response = await axios.get(endpoint);
       console.log("Fetched data:", response.data);
-      // Handle cases where the response might be an object with a records property.
       const records = Array.isArray(response.data)
         ? response.data
         : response.data.records || [];
@@ -57,15 +56,14 @@ const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => {
     }
   };
 
-  // Create a new record, solidify it in the table, then clear inputs for a new create row
+  // Create a new record
   const handleCreate = async () => {
     console.log("Creating record with:", newRecord);
     try {
-      // Send the new record to the backend
-      await axios.post(endpoint, newRecord);
-      // Clear the create row inputs
+      const response = await axios.post(endpoint, newRecord);
+      console.log("Record created:", response.data);
+      // Clear the create row inputs and solidify the new row
       setNewRecord({});
-      // Refresh the table so the new record appears as a "solidified" row
       fetchData();
     } catch (error) {
       console.error("Error creating record:", error);
@@ -97,7 +95,7 @@ const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => {
           </tr>
         </thead>
         <tbody>
-          {/* Render each record row */}
+          {/* Existing record rows */}
           {data.map((record) => (
             <tr key={record.id}>
               <td className="border p-2 text-center">
@@ -115,7 +113,6 @@ const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => {
                     value={record[field.name] || ""}
                     onChange={(e) => {
                       const updatedValue = e.target.value;
-                      // Update local state for immediate feedback on change
                       const newData = data.map((item) =>
                         item.id === record.id
                           ? { ...item, [field.name]: updatedValue }
@@ -145,12 +142,11 @@ const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => {
                 <input
                   type={field.type}
                   value={newRecord[field.name] || ""}
-                  onChange={(e) =>
-                    setNewRecord({
-                      ...newRecord,
-                      [field.name]: e.target.value,
-                    })
-                  }
+                  onChange={(e) => {
+                    const updated = { ...newRecord, [field.name]: e.target.value };
+                    console.log(`Updated ${field.name}:`, updated);
+                    setNewRecord(updated);
+                  }}
                   className="w-full p-1 border rounded"
                   placeholder={field.label}
                 />
