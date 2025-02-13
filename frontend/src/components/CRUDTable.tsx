@@ -21,11 +21,13 @@ const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => {
   const fetchData = async () => {
     try {
       const response = await axios.get(endpoint);
+      console.log("Fetched data:", response.data);
       setData(response.data);
     } catch (error) {
       console.error("Error fetching data:", error);
     }
   };
+  
 
   useEffect(() => {
     fetchData();
