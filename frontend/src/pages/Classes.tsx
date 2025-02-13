@@ -1,13 +1,18 @@
-import CRUDTable from "../components/CRUDTable";
+import React from "react";
+import CRUDTable from "../CRUDTable";
 
-const Classes = () => {
-  const fields = [
-    { name: "class_id", label: "ID", type: "number", readOnly: true },
-    { name: "class_name", label: "Name", type: "text" },
-    { name: "class_description", label: "Description", type: "text" },
-  ];
+const classesFields = [
+  { name: "name", label: "Class Name", type: "text" },
+  { name: "description", label: "Description", type: "text" },
+  // Add more fields as needed
+];
 
-  return <CRUDTable title="Classes" endpoint="classes" fields={fields} />;
+const ClassesPage: React.FC = () => {
+  return (
+    <div>
+      <CRUDTable title="Classes" endpoint="/api/classes" fields={classesFields} />
+    </div>
+  );
 };
 
-export default Classes;
+export default ClassesPage;

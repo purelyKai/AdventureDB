@@ -10,17 +10,14 @@ interface Field {
 
 interface CRUDTableProps {
   title: string;
-  endpoint: string; // e.g., "/api/characters"
+  endpoint: string;
   fields: Field[];
 }
 
-const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => { // I think I need the defined endpoints
-  // data holds the list of records fetched from the backend
+const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => {
   const [data, setData] = useState<any[]>([]);
-  // newRecord holds the values for a new entity to be created
   const [newRecord, setNewRecord] = useState<Record<string, any>>({});
 
-  // Fetch data from the backend
   const fetchData = async () => {
     try {
       const response = await axios.get(endpoint);
@@ -30,12 +27,10 @@ const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => { /
     }
   };
 
-  // Fetch the data on component mount
   useEffect(() => {
     fetchData();
   }, [endpoint]);
 
-  // Handle deletion of a record
   const handleDelete = async (recordId: any) => {
     try {
       await axios.delete(`${endpoint}/${recordId}`);
@@ -45,7 +40,6 @@ const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => { /
     }
   };
 
-  // Handle updating a record (send the updated record to the backend)
   const handleRowUpdate = async (recordId: any, updatedRecord: any) => {
     try {
       await axios.put(`${endpoint}/${recordId}`, updatedRecord);
@@ -55,22 +49,19 @@ const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => { /
     }
   };
 
-  // Handle creating a new record
   const handleCreate = async () => {
     try {
       await axios.post(endpoint, newRecord);
-      setNewRecord({}); // reset the create form
+      setNewRecord({});
       fetchData();
     } catch (error) {
       console.error("Error creating record:", error);
     }
   };
 
-  // Render the table with CRUD controls
   return (
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-4">{title}</h1>
-      {/* Refresh Button for Read */}
       <button
         onClick={fetchData}
         className="mb-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
@@ -80,21 +71,19 @@ const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => { /
       <table className="min-w-full border-collapse">
         <thead>
           <tr>
-            {/* Delete column */}
+            {/* Left header with an X to denote deletion */}
             <th className="border p-2 text-center">
-            <span className="text-red-500 font-bold">X</span>
+              <span className="text-red-500 font-bold">X</span>
             </th>
             {fields.map((field) => (
               <th key={field.name} className="border p-2">
                 {field.label}
               </th>
             ))}
-            {/* Update column */}
             <th className="border p-2">Update</th>
           </tr>
         </thead>
         <tbody>
-          {/* Render each record */}
           {data.map((record) => (
             <tr key={record.id}>
               <td className="border p-2 text-center">
@@ -111,7 +100,6 @@ const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => { /
                     type={field.type}
                     value={record[field.name] || ""}
                     onChange={(e) => {
-                      // Update the local copy of data for immediate feedback
                       const updatedValue = e.target.value;
                       const newData = data.map((item) =>
                         item.id === record.id
@@ -134,7 +122,6 @@ const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => { /
               </td>
             </tr>
           ))}
-          {/* Row for creating a new record */}
           <tr>
             <td className="border p-2"></td>
             {fields.map((field) => (
