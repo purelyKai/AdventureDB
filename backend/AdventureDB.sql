@@ -2,7 +2,8 @@ SET FOREIGN_KEY_CHECKS=0;
 SET AUTOCOMMIT = 0;
 
 -- -----------------------------------------------------
--- Table `Classes`
+-- Create Table `Classes`
+-- A class can be associated with many characters
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `Classes` (
   `class_id` INT NOT NULL AUTO_INCREMENT,
@@ -12,17 +13,22 @@ CREATE TABLE IF NOT EXISTS `Classes` (
 );
 
 -- -----------------------------------------------------
--- Table `Chests`
+-- Create Table `Chests`
+-- A chest must have at least one item and there can
+-- be duplicate items among chests
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `Chests` (
   `chest_id` INT NOT NULL AUTO_INCREMENT,
-  `chest_x_coordinate` FLOAT NOT NULL,
-  `chest_y_coordinate` FLOAT NOT NULL,
+  `chest_x_coordinate` DECIMAL(10,5) NOT NULL,
+  `chest_y_coordinate` DECIMAL(10,5) NOT NULL,
   PRIMARY KEY (`chest_id`)
 );
 
 -- -----------------------------------------------------
--- Table `Characters`
+-- Create Table `Characters`
+-- A character can have multiple items and multiple
+-- quests, but must have one class. There can be duplicate
+-- items among characters, but not duplicate quests
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `Characters` (
   `character_id` INT NOT NULL AUTO_INCREMENT,
@@ -35,7 +41,10 @@ CREATE TABLE IF NOT EXISTS `Characters` (
 );
 
 -- -----------------------------------------------------
--- Table `Quests`
+-- Create Table `Quests`
+-- A quest must give at least one item and can be associated
+-- with a max of one character. There can't be duplicate item
+-- rewards among quests
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `Quests` (
   `quest_id` INT NOT NULL AUTO_INCREMENT,
@@ -49,7 +58,10 @@ CREATE TABLE IF NOT EXISTS `Quests` (
 );
 
 -- -----------------------------------------------------
--- Table `Items`
+-- Create Table `Items`
+-- An item can be associated with multiple characters and
+-- multiple chests, but can only be associated with a max
+-- of 1 quest
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `Items` (
   `item_id` INT NOT NULL AUTO_INCREMENT,
@@ -65,7 +77,9 @@ CREATE TABLE IF NOT EXISTS `Items` (
 );
 
 -- -----------------------------------------------------
--- Table `Characters_has_Items`
+-- Create Table `Characters_has_Items`
+-- Each entry must have a link to a character and item,
+-- but not every character and item will have an entry
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `Characters_has_Items` (
   `character_has_items_id` INT NOT NULL AUTO_INCREMENT,
@@ -82,6 +96,9 @@ CREATE TABLE IF NOT EXISTS `Characters_has_Items` (
 
 -- -----------------------------------------------------
 -- Table `Chests_has_Items`
+-- Each entry must have a link to a chest and item,
+-- but not every item will have an entry. Every chest must
+-- have an entry since each chest must give at least one item.
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `Chests_has_Items` (
   `chest_has_items_id` INT NOT NULL AUTO_INCREMENT,
