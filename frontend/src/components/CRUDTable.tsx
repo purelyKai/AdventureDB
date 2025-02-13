@@ -23,6 +23,7 @@ const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => {
     try {
       const response = await axios.get(endpoint);
       console.log("Fetched data:", response.data);
+      // Handle cases where the response might be an object with a records property.
       const records = Array.isArray(response.data)
         ? response.data
         : response.data.records || [];
@@ -56,16 +57,15 @@ const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => {
     }
   };
 
-  // Create a new record
+  // Create a new record, solidify it in the table, then clear inputs for a new create row
   const handleCreate = async () => {
     console.log("Creating record with:", newRecord);
     try {
-      const response = await axios.post(endpoint, newRecord);
-      console.log("Record created:", response.data);
-      // Option 1: If your API returns the new record, you could add it optimistically:
-      // setData([...data, response.data]);
-      // Option 2: Re-fetch the data to ensure the table is up to date:
-      setNewRecord({}); // Clear the create form
+      // Send the new record to the backend
+      await axios.post(endpoint, newRecord);
+      // Clear the create row inputs
+      setNewRecord({});
+      // Refresh the table so the new record appears as a "solidified" row
       fetchData();
     } catch (error) {
       console.error("Error creating record:", error);
@@ -97,6 +97,7 @@ const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => {
           </tr>
         </thead>
         <tbody>
+          {/* Render each record row */}
           {data.map((record) => (
             <tr key={record.id}>
               <td className="border p-2 text-center">
@@ -114,6 +115,7 @@ const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => {
                     value={record[field.name] || ""}
                     onChange={(e) => {
                       const updatedValue = e.target.value;
+                      // Update local state for immediate feedback on change
                       const newData = data.map((item) =>
                         item.id === record.id
                           ? { ...item, [field.name]: updatedValue }
