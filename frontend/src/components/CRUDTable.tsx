@@ -21,13 +21,16 @@ const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => {
   const fetchData = async () => {
     try {
       const response = await axios.get(endpoint);
-      console.log("Fetched data:", response.data);
-      setData(response.data);
+      console.log("Fetched data:", response.data); // Check what this prints
+      // If the response is an object with an array property, update accordingly:
+      const records = Array.isArray(response.data) 
+        ? response.data 
+        : response.data.records || []; // adjust "records" to the correct property name
+      setData(records);
     } catch (error) {
       console.error("Error fetching data:", error);
     }
-  };
-  
+  };  
 
   useEffect(() => {
     fetchData();
