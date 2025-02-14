@@ -1,8 +1,9 @@
 import CRUDTable from "../components/CRUDTable";
 
 const fields = [
-  { name: "name", label: "Name", type: "text" },
-  { name: "class", label: "Class", type: "text" },
+  { name: "character_id", label: "ID", type: "number", readOnly: true },
+  { name: "character_name", label: "Name", type: "text" },
+  { name: "class_id", label: "Class", type: "text" },
 ];
 
 const CharactersPage: React.FC = () => {
