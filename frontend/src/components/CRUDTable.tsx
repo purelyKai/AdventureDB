@@ -19,6 +19,7 @@ interface RecordData {
 }
 
 const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => {
+  endpoint = endpoint + ""; // Temp for build
   // State to hold the list of records (mock data)
   const [data, setData] = useState<RecordData[]>([]);
   // State to hold the new record's inputs
