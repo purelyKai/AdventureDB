@@ -21,7 +21,8 @@ CREATE TABLE IF NOT EXISTS `Chests` (
   `chest_id` INT NOT NULL AUTO_INCREMENT,
   `chest_x_coordinate` DECIMAL(10,5) NOT NULL,
   `chest_y_coordinate` DECIMAL(10,5) NOT NULL,
-  PRIMARY KEY (`chest_id`)
+  PRIMARY KEY (`chest_id`),
+  CONSTRAINT chest_full_coordinates UNIQUE (chest_x_coordinate, chest_y_coordinate)
 );
 
 -- -----------------------------------------------------
@@ -77,11 +78,11 @@ CREATE TABLE IF NOT EXISTS `Items` (
 );
 
 -- -----------------------------------------------------
--- Create Table `Characters_has_Items`
+-- Create Table `Character_has_Items`
 -- Each entry must have a link to a character and item,
 -- but not every character and item will have an entry
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `Characters_has_Items` (
+CREATE TABLE IF NOT EXISTS `Character_has_Items` (
   `character_has_items_id` INT NOT NULL AUTO_INCREMENT,
   `character_id` INT NOT NULL,
   `item_id` INT NOT NULL,
@@ -95,12 +96,12 @@ CREATE TABLE IF NOT EXISTS `Characters_has_Items` (
 );
 
 -- -----------------------------------------------------
--- Table `Chests_has_Items`
+-- Table `Chest_has_Items`
 -- Each entry must have a link to a chest and item,
 -- but not every item will have an entry. Every chest must
 -- have an entry since each chest must give at least one item.
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `Chests_has_Items` (
+CREATE TABLE IF NOT EXISTS `Chest_has_Items` (
   `chest_has_items_id` INT NOT NULL AUTO_INCREMENT,
   `chest_id` INT NOT NULL,
   `item_id` INT NOT NULL,
@@ -146,16 +147,16 @@ INSERT INTO `Items` (`item_id`, `item_name`, `item_description`, `item_power`, `
 (3, 'Emerald Sword', 'The sword carried by the wealthiest villagers', 10, 5, 1),
 (4, 'Steel Bow', 'Crafted from molten rock from the center of the Earth', 6, 20, 4),
 (5, 'Battle Axe', 'Stolen from the great vikings of the west', 12, 2, 3),
-(6, 'Throwing Daggar', 'Given by the assassins of the great creed', 5, 15, 3);
+(6, 'Throwing Dagger', 'Given by the assassins of the great creed', 5, 15, 3);
 
 -- Inserting sample data into 'Character_has_Items' table
-INSERT INTO `Characters_has_Items` (`character_id`, `item_id`) VALUES
+INSERT INTO `Character_has_Items` (`character_id`, `item_id`) VALUES
 (1, 1),
 (1, 2),
 (3, 2);
 
--- Inserting sample data into 'Chests_has_Items' table
-INSERT INTO `Chests_has_Items` (`chest_id`, `item_id`) VALUES
+-- Inserting sample data into 'Chest_has_Items' table
+INSERT INTO `Chest_has_Items` (`chest_id`, `item_id`) VALUES
 (1, 1),
 (1, 3),
 (2, 1),
