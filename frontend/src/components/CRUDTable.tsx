@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 
 interface Field {
   name: string;
@@ -10,92 +9,61 @@ interface Field {
 
 interface CRUDTableProps {
   title: string;
-  endpoint: string;
   fields: Field[];
 }
 
-const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => {
-  // useState hook for storing the fetched data (existing records)
-  const [data, setData] = useState<any[]>([]);
-  // useState hook for storing the new record's input values
+interface RecordData {
+  id: number;
+  [key: string]: any;
+}
+
+const CRUDTable: React.FC<CRUDTableProps> = ({ title, fields }) => {
+  // State to hold the list of records (mock data)
+  const [data, setData] = useState<RecordData[]>([]);
+  // State to hold the new record's inputs
   const [newRecord, setNewRecord] = useState<Record<string, any>>({});
+  // A counter to generate unique ids for new records
+  const [nextId, setNextId] = useState<number>(1);
 
-  // useEffect hook to fetch data when the component mounts or when the endpoint changes
+  // useEffect to log when data changes (you can add any side effect here)
   useEffect(() => {
-    fetchData();
-  }, [endpoint]);
+    console.log("Data updated:", data);
+  }, [data]);
 
-  // Function to fetch data from the backend
-  const fetchData = async () => {
-    try {
-      const response = await axios.get(endpoint);
-      console.log("Fetched data:", response.data);
-      const records = Array.isArray(response.data)
-        ? response.data
-        : response.data.records || [];
-      setData(records);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    }
-  };
-  
-
-  // Delete a record by its id
-  const handleDelete = async (recordId: any) => {
-    try {
-      await axios.delete(`${endpoint}/${recordId}`);
-      fetchData();
-    } catch (error) {
-      console.error("Error deleting record:", error);
-    }
-  };
-
-  // Update an existing record
-  const handleRowUpdate = async (recordId: any, updatedRecord: any) => {
-    try {
-      await axios.put(`${endpoint}/${recordId}`, updatedRecord);
-      fetchData();
-    } catch (error) {
-      console.error("Error updating record:", error);
-    }
-  };
-
-  // Create a new record and refresh the table
-  const handleCreate = async () => {
+  // Create a new record and update the table
+  const handleCreate = () => {
     console.log("Creating record with:", newRecord);
-    try {
-      const response = await axios.post(endpoint, newRecord);
-      console.log("Record created:", response.data);
-      // Append the new record to state if it contains an id:
-      if (response.data && response.data.id) {
-        setData([...data, response.data]);
-      } else {
-        // If not, fetch all data from the backend:
-        fetchData();
-      }
-      // Clear the create inputs:
-      setNewRecord({});
-    } catch (error) {
-      console.error("Error creating record:", error);
-    }
+    // Generate a new record with a unique id
+    const record: RecordData = { ...newRecord, id: nextId };
+    // Append the new record to the existing data
+    setData([...data, record]);
+    // Increment the id counter
+    setNextId(nextId + 1);
+    // Clear the input fields for the next new record
+    setNewRecord({});
   };
-  
-  
-  
+
+  // Update an existing record when an input changes
+  const handleRowUpdate = (recordId: number, fieldName: string, value: any) => {
+    const updatedData = data.map((record) =>
+      record.id === recordId ? { ...record, [fieldName]: value } : record
+    );
+    setData(updatedData);
+  };
+
+  // Delete a record from the data
+  const handleDelete = (recordId: number) => {
+    const updatedData = data.filter((record) => record.id !== recordId);
+    setData(updatedData);
+  };
 
   return (
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-4">{title}</h1>
-      <button
-        onClick={fetchData}
-        className="mb-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-      >
-        Refresh
-      </button>
       <table className="min-w-full border-collapse">
         <thead>
           <tr>
-            {/* Header for the delete column */}
+            {/* Column header for deletion */}
             <th className="border p-2 text-center">
               <span className="text-red-500 font-bold">X</span>
             </th>
@@ -104,12 +72,12 @@ const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => {
                 {field.label}
               </th>
             ))}
-            {/* Header for the update column */}
+            {/* Column header for update (for visual purposes) */}
             <th className="border p-2">Update</th>
           </tr>
         </thead>
         <tbody>
-          {/* Render each existing record */}
+          {/* Existing records */}
           {data.map((record) => (
             <tr key={record.id}>
               <td className="border p-2 text-center">
@@ -125,31 +93,22 @@ const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => {
                   <input
                     type={field.type}
                     value={record[field.name] || ""}
-                    onChange={(e) => {
-                      const updatedValue = e.target.value;
-                      // Update local state for immediate feedback
-                      const newData = data.map((item) =>
-                        item.id === record.id
-                          ? { ...item, [field.name]: updatedValue }
-                          : item
-                      );
-                      setData(newData);
-                    }}
+                    onChange={(e) =>
+                      handleRowUpdate(record.id, field.name, e.target.value)
+                    }
                     className="w-full p-1 border rounded"
                   />
                 </td>
               ))}
               <td className="border p-2 text-center">
-                <button
-                  onClick={() => handleRowUpdate(record.id, record)}
-                  className="px-2 py-1 bg-green-500 text-white rounded hover:bg-green-600"
-                >
-                  UPDATE
+                {/* The update button is optional since changes are immediate */}
+                <button className="px-2 py-1 bg-green-500 text-white rounded hover:bg-green-600">
+                  Update
                 </button>
               </td>
             </tr>
           ))}
-          {/* Create New Record Row */}
+          {/* Create new record row */}
           <tr>
             <td className="border p-2"></td>
             {fields.map((field) => (
@@ -157,11 +116,12 @@ const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => {
                 <input
                   type={field.type}
                   value={newRecord[field.name] || ""}
-                  onChange={(e) => {
-                    const updated = { ...newRecord, [field.name]: e.target.value };
-                    console.log(`Updated ${field.name}:`, updated);
-                    setNewRecord(updated);
-                  }}
+                  onChange={(e) =>
+                    setNewRecord({
+                      ...newRecord,
+                      [field.name]: e.target.value,
+                    })
+                  }
                   className="w-full p-1 border rounded"
                   placeholder={field.label}
                 />
