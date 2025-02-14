@@ -1,16 +1,18 @@
-import React from "react";
 import CRUDTable from "../components/CRUDTable";
 
-const charactersFields = [
+const fields = [
   { name: "name", label: "Name", type: "text" },
   { name: "class", label: "Class", type: "text" },
-  // Add additional character fields as needed
 ];
 
 const CharactersPage: React.FC = () => {
   return (
     <div>
-      <CRUDTable title="Characters" endpoint="/api/characters" fields={charactersFields} />
+      <CRUDTable
+        title="Characters"
+        endpoint="/api/characters"
+        fields={fields}
+      />
     </div>
   );
 };

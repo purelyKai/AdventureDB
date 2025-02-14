@@ -9,6 +9,7 @@ interface Field {
 
 interface CRUDTableProps {
   title: string;
+  endpoint: string;
   fields: Field[];
 }
 
@@ -17,7 +18,7 @@ interface RecordData {
   [key: string]: any;
 }
 
-const CRUDTable: React.FC<CRUDTableProps> = ({ title, fields }) => {
+const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => {
   // State to hold the list of records (mock data)
   const [data, setData] = useState<RecordData[]>([]);
   // State to hold the new record's inputs
