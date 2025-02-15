@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from "react";
 
+const API_BASE_URL =
+  "https://web.engr.oregonstate.edu/~blackkai/AdventureDB/api/";
+
 interface Field {
   name: string;
   label: string;
@@ -30,7 +33,7 @@ const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => {
 
   const fetchData = async () => {
     try {
-      const response = await fetch(`/api/${endpoint}`);
+      const response = await fetch(`${API_BASE_URL}${endpoint}`);
       const result = await response.json();
       setData(result);
     } catch (error) {
@@ -40,7 +43,7 @@ const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => {
 
   const handleCreate = async () => {
     try {
-      const response = await fetch(`/api/${endpoint}`, {
+      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newRecord),
@@ -61,11 +64,14 @@ const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => {
   const handleConfirmEdit = async () => {
     if (editRecord) {
       try {
-        const response = await fetch(`/api/${endpoint}/${editRecord.id}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(editRecord),
-        });
+        const response = await fetch(
+          `${API_BASE_URL}${endpoint}/${editRecord.id}`,
+          {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(editRecord),
+          }
+        );
         if (response.ok) {
           fetchData();
           setEditRecord(null);
@@ -82,7 +88,7 @@ const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => {
 
   const handleDelete = async (recordId: number) => {
     try {
-      const response = await fetch(`/api/${endpoint}/${recordId}`, {
+      const response = await fetch(`${API_BASE_URL}${endpoint}/${recordId}`, {
         method: "DELETE",
       });
       if (response.ok) {
