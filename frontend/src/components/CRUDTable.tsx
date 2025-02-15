@@ -20,35 +20,59 @@ interface RecordData {
 }
 
 const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => {
-  endpoint = endpoint + ""; // Temp for build
   const [data, setData] = useState<RecordData[]>([]);
   const [newRecord, setNewRecord] = useState<Record<string, any>>({});
-  const [nextId, setNextId] = useState<number>(1);
   const [editRecord, setEditRecord] = useState<RecordData | null>(null);
 
   useEffect(() => {
-    console.log("Data updated:", data);
-  }, [data]);
+    fetchData();
+  }, []);
 
-  const handleCreate = () => {
-    console.log("Creating record with:", newRecord);
-    const record: RecordData = { ...newRecord, id: nextId };
-    setData([...data, record]);
-    setNextId(nextId + 1);
-    setNewRecord({});
+  const fetchData = async () => {
+    try {
+      const response = await fetch(`/api/${endpoint}`);
+      const result = await response.json();
+      setData(result);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
+
+  const handleCreate = async () => {
+    try {
+      const response = await fetch(`/api/${endpoint}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newRecord),
+      });
+      if (response.ok) {
+        fetchData();
+        setNewRecord({});
+      }
+    } catch (error) {
+      console.error("Error creating record:", error);
+    }
   };
 
   const handleEdit = (record: RecordData) => {
     setEditRecord({ ...record });
   };
 
-  const handleConfirmEdit = () => {
+  const handleConfirmEdit = async () => {
     if (editRecord) {
-      const updatedData = data.map((record) =>
-        record.id === editRecord.id ? editRecord : record
-      );
-      setData(updatedData);
-      setEditRecord(null);
+      try {
+        const response = await fetch(`/api/${endpoint}/${editRecord.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(editRecord),
+        });
+        if (response.ok) {
+          fetchData();
+          setEditRecord(null);
+        }
+      } catch (error) {
+        console.error("Error updating record:", error);
+      }
     }
   };
 
@@ -56,9 +80,17 @@ const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => {
     setEditRecord(null);
   };
 
-  const handleDelete = (recordId: number) => {
-    const updatedData = data.filter((record) => record.id !== recordId);
-    setData(updatedData);
+  const handleDelete = async (recordId: number) => {
+    try {
+      const response = await fetch(`/api/${endpoint}/${recordId}`, {
+        method: "DELETE",
+      });
+      if (response.ok) {
+        fetchData();
+      }
+    } catch (error) {
+      console.error("Error deleting record:", error);
+    }
   };
 
   return (
