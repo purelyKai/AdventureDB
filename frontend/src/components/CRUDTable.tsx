@@ -6,8 +6,9 @@ interface Field {
   name: string;
   label: string;
   type: string;
-  options?: { value: string; label: string }[];
   readOnly?: boolean;
+  foreignKey?: boolean;
+  optionsEndpoint?: string;
 }
 
 interface CRUDTableProps {
@@ -25,9 +26,13 @@ const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => {
   const [data, setData] = useState<RecordData[]>([]);
   const [newRecord, setNewRecord] = useState<Record<string, any>>({});
   const [editRecord, setEditRecord] = useState<RecordData | null>(null);
+  const [foreignKeyOptions, setForeignKeyOptions] = useState<{
+    [key: string]: { value: string; label: string }[];
+  }>({});
 
   useEffect(() => {
     fetchData();
+    fetchForeignKeyOptions();
   }, []);
 
   const fetchData = async () => {
@@ -38,6 +43,28 @@ const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => {
     } catch (error) {
       console.error("Error fetching data:", error);
     }
+  };
+
+  const fetchForeignKeyOptions = async () => {
+    const newOptions: { [key: string]: { value: string; label: string }[] } =
+      {};
+    for (const field of fields) {
+      if (field.foreignKey && field.optionsEndpoint) {
+        try {
+          const response = await fetch(
+            `${API_BASE_URL}${field.optionsEndpoint}`
+          );
+          const result = await response.json();
+          newOptions[field.name] = result.map((item: any) => ({
+            value: item.id.toString(),
+            label: item.name,
+          }));
+        } catch (error) {
+          console.error(`Error fetching options for ${field.name}:`, error);
+        }
+      }
+    }
+    setForeignKeyOptions(newOptions);
   };
 
   const handleCreate = async () => {
@@ -102,23 +129,41 @@ const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => {
     <div className="p-4 flex gap-8">
       <div className="w-1/3 p-4 border rounded shadow-lg">
         <h2 className="text-lg font-bold mb-2">Add New Record</h2>
-        {fields.map((field) => (
-          <div key={field.name} className="mb-2">
-            <label className="block text-sm font-medium mb-1">
-              {field.label}
-            </label>
-            <input
-              type={field.type}
-              value={newRecord[field.name] || ""}
-              onChange={(e) =>
-                setNewRecord({ ...newRecord, [field.name]: e.target.value })
-              }
-              className="w-full p-2 border rounded"
-              placeholder={field.label}
-              readOnly={field.readOnly}
-            />
-          </div>
-        ))}
+        {fields
+          .filter((field) => !field.readOnly)
+          .map((field) => (
+            <div key={field.name} className="mb-2">
+              <label className="block text-sm font-medium mb-1">
+                {field.label}
+              </label>
+              {field.foreignKey ? (
+                <select
+                  value={newRecord[field.name] || ""}
+                  onChange={(e) =>
+                    setNewRecord({ ...newRecord, [field.name]: e.target.value })
+                  }
+                  className="w-full p-2 border rounded"
+                >
+                  <option value="">Select {field.label}</option>
+                  {foreignKeyOptions[field.name]?.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <input
+                  type={field.type}
+                  value={newRecord[field.name] || ""}
+                  onChange={(e) =>
+                    setNewRecord({ ...newRecord, [field.name]: e.target.value })
+                  }
+                  className="w-full p-2 border rounded"
+                  placeholder={field.label}
+                />
+              )}
+            </div>
+          ))}
         <button
           onClick={handleCreate}
           className="w-full px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
@@ -156,18 +201,38 @@ const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => {
                 {fields.map((field) => (
                   <td key={field.name} className="border p-2">
                     {editRecord && editRecord.id === record.id ? (
-                      <input
-                        type={field.type}
-                        value={editRecord[field.name] || ""}
-                        onChange={(e) =>
-                          setEditRecord({
-                            ...editRecord,
-                            [field.name]: e.target.value,
-                          })
-                        }
-                        className="w-full p-1 border rounded"
-                        readOnly={field.readOnly}
-                      />
+                      field.foreignKey ? (
+                        <select
+                          value={editRecord[field.name] || ""}
+                          onChange={(e) =>
+                            setEditRecord({
+                              ...editRecord,
+                              [field.name]: e.target.value,
+                            })
+                          }
+                          className="w-full p-1 border rounded"
+                        >
+                          <option value="">Select {field.label}</option>
+                          {foreignKeyOptions[field.name]?.map((option) => (
+                            <option key={option.value} value={option.value}>
+                              {option.label}
+                            </option>
+                          ))}
+                        </select>
+                      ) : (
+                        <input
+                          type={field.type}
+                          value={editRecord[field.name] || ""}
+                          onChange={(e) =>
+                            setEditRecord({
+                              ...editRecord,
+                              [field.name]: e.target.value,
+                            })
+                          }
+                          className="w-full p-1 border rounded"
+                          readOnly={field.readOnly}
+                        />
+                      )
                     ) : (
                       <span>{record[field.name]}</span>
                     )}

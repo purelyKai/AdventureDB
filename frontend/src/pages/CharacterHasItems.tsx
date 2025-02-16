@@ -8,8 +8,20 @@ const CharacterHasItems = () => {
       type: "number",
       readOnly: true,
     },
-    { name: "character_id", label: "Character", type: "select", options: [] },
-    { name: "item_id", label: "Item", type: "select", options: [] },
+    {
+      name: "character_id",
+      label: "Character",
+      type: "select",
+      foreignKey: true,
+      optionsEndpoint: "Characters",
+    },
+    {
+      name: "item_id",
+      label: "Item",
+      type: "select",
+      foreignKey: true,
+      optionsEndpoint: "Items",
+    },
   ];
 
   return (

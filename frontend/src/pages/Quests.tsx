@@ -5,7 +5,13 @@ const Quests = () => {
     { name: "quest_id", label: "ID", type: "number", readOnly: true },
     { name: "quest_name", label: "Name", type: "text" },
     { name: "quest_description", label: "Description", type: "text" },
-    { name: "character_id", label: "Character", type: "select", options: [] },
+    {
+      name: "character_id",
+      label: "Character",
+      type: "select",
+      foreignKey: true,
+      optionsEndpoint: "Characters",
+    },
   ];
 
   return <CRUDTable title="Quests" endpoint="Quests" fields={fields} />;

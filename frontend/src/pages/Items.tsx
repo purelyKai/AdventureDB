@@ -7,7 +7,13 @@ const Items = () => {
     { name: "item_description", label: "Description", type: "text" },
     { name: "item_power", label: "Power", type: "number" },
     { name: "item_range", label: "Range", type: "number" },
-    { name: "quest_id", label: "Quest", type: "select", options: [] },
+    {
+      name: "quest_id",
+      label: "Quest",
+      type: "select",
+      foreignKey: true,
+      optionsEndpoint: "Quests",
+    },
   ];
 
   return <CRUDTable title="Items" endpoint="Items" fields={fields} />;
