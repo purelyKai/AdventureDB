@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 
-const API_BASE_URL =
-  "https://web.engr.oregonstate.edu/~blackkai/AdventureDB/api/";
+const API_BASE_URL = "http://localhost:3001/api/";
 
 interface Field {
   name: string;
