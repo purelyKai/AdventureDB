@@ -1,0 +1,178 @@
+{
+  "Classes": [
+    {
+      "class_id": 1,
+      "class_name": "Wizard",
+      "class_description": "Harness the power of magic and unleash your wrath"
+    },
+    {
+      "class_id": 2,
+      "class_name": "Undead",
+      "class_description": "Live past death and carry on into the next life"
+    },
+    {
+      "class_id": 3,
+      "class_name": "Human",
+      "class_description": "Regular human with nothing special"
+    }
+  ],
+  "Chests": [
+    {
+      "chest_id": 1,
+      "chest_x_coordinate": 50,
+      "chest_y_coordinate": 90
+    },
+    {
+      "chest_id": 2,
+      "chest_x_coordinate": 300.5,
+      "chest_y_coordinate": 20.5
+    },
+    {
+      "chest_id": 3,
+      "chest_x_coordinate": 750.5,
+      "chest_y_coordinate": 320.25
+    }
+  ],
+  "Characters": [
+    {
+      "character_id": 1,
+      "character_name": "magic4Life",
+      "class_id": 1
+    },
+    {
+      "character_id": 2,
+      "character_name": "sorceryIsWild99",
+      "class_id": 1
+    },
+    {
+      "character_id": 3,
+      "character_name": "simpleHuman29",
+      "class_id": 3
+    },
+    {
+      "character_id": 4,
+      "character_name": "fastHuman36",
+      "class_id": 3
+    },
+    {
+      "character_name": "purelyKai",
+      "class_id": "2",
+      "character_id": 5
+    }
+  ],
+  "Quests": [
+    {
+      "quest_id": 1,
+      "quest_name": "Save the village",
+      "quest_description": "Release the villagers from the prisons and stop the pillaging of their town",
+      "character_id": 2
+    },
+    {
+      "quest_id": 2,
+      "quest_name": "Supreme gardening",
+      "quest_description": "Garden 100 acres of land and harvest crops for the villagers",
+      "character_id": 2
+    },
+    {
+      "quest_id": 3,
+      "quest_name": "Find the lost cave",
+      "quest_description": "Search the lands between to find the hidden cave that holds unknown treasures",
+      "character_id": null
+    },
+    {
+      "quest_id": 4,
+      "quest_name": "Slay the wild beast",
+      "quest_description": "Harness the power of your weapons to slay the mighty beast",
+      "character_id": 3
+    }
+  ],
+  "Items": [
+    {
+      "item_id": 1,
+      "item_name": "Diamond Sword",
+      "item_description": "Made of diamonds",
+      "item_power": 8,
+      "item_range": 4,
+      "quest_id": null
+    },
+    {
+      "item_id": 2,
+      "item_name": "Diamond Hoe",
+      "item_description": "The most valuable gardening item",
+      "item_power": 7,
+      "item_range": 2,
+      "quest_id": 2
+    },
+    {
+      "item_id": 3,
+      "item_name": "Emerald Sword",
+      "item_description": "The sword carried by the wealthiest villagers",
+      "item_power": 10,
+      "item_range": 5,
+      "quest_id": 1
+    },
+    {
+      "item_id": 4,
+      "item_name": "Steel Bow",
+      "item_description": "Crafted from molten rock from the center of the Earth",
+      "item_power": 6,
+      "item_range": 20,
+      "quest_id": 4
+    },
+    {
+      "item_id": 5,
+      "item_name": "Battle Axe",
+      "item_description": "Stolen from the great vikings of the west",
+      "item_power": 12,
+      "item_range": 2,
+      "quest_id": 3
+    },
+    {
+      "item_id": 6,
+      "item_name": "Throwing Dagger",
+      "item_description": "Given by the assassins of the great creed",
+      "item_power": 5,
+      "item_range": 15,
+      "quest_id": 3
+    }
+  ],
+  "Character_has_Items": [
+    {
+      "character_has_items_id": 1,
+      "character_id": 1,
+      "item_id": 1
+    },
+    {
+      "character_has_items_id": 2,
+      "character_id": 1,
+      "item_id": 2
+    },
+    {
+      "character_has_items_id": 3,
+      "character_id": 3,
+      "item_id": 2
+    }
+  ],
+  "Chest_has_Items": [
+    {
+      "chest_has_items_id": 1,
+      "chest_id": 1,
+      "item_id": 1
+    },
+    {
+      "chest_has_items_id": 2,
+      "chest_id": 1,
+      "item_id": 3
+    },
+    {
+      "chest_has_items_id": 3,
+      "chest_id": 2,
+      "item_id": 1
+    },
+    {
+      "chest_has_items_id": 4,
+      "chest_id": 3,
+      "item_id": 2
+    }
+  ]
+}
