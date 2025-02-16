@@ -44,13 +44,13 @@ const Layout = () => {
                   Chests
                 </Link>
                 <Link
-                  to="/character-has-items"
+                  to="/character_has_items"
                   className="text-gray-600 hover:text-gray-800 px-3 py-2 rounded-md text-sm font-medium"
                 >
                   CharacterHasItems
                 </Link>
                 <Link
-                  to="/chest-has-items"
+                  to="/chest_has_items"
                   className="text-gray-600 hover:text-gray-800 px-3 py-2 rounded-md text-sm font-medium"
                 >
                   ChestHasItems

@@ -20,8 +20,8 @@ function App() {
           <Route path="items" element={<Items />} />
           <Route path="quests" element={<Quests />} />
           <Route path="chests" element={<Chests />} />
-          <Route path="character-has-items" element={<CharacterHasItems />} />
-          <Route path="chest-has-items" element={<ChestHasItems />} />
+          <Route path="character_has_items" element={<CharacterHasItems />} />
+          <Route path="chest_has_items" element={<ChestHasItems />} />
         </Route>
       </Routes>
     </Router>
