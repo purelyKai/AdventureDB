@@ -8,7 +8,7 @@ const ChestHasItems = () => {
   ];
 
   return (
-    <CRUDTable title="Chest Items" endpoint="chest-has-items" fields={fields} />
+    <CRUDTable title="Chest Items" endpoint="Chest_has_Items" fields={fields} />
   );
 };
 

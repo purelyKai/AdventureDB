@@ -7,7 +7,7 @@ const Chests = () => {
     { name: "chest_y_coordinate", label: "Y Coordinate", type: "number" },
   ];
 
-  return <CRUDTable title="Chests" endpoint="chests" fields={fields} />;
+  return <CRUDTable title="Chests" endpoint="Chests" fields={fields} />;
 };
 
 export default Chests;

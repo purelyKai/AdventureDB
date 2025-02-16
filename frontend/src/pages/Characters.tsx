@@ -9,7 +9,7 @@ const fields = [
 const CharactersPage: React.FC = () => {
   return (
     <div>
-      <CRUDTable title="Characters" endpoint="characters" fields={fields} />
+      <CRUDTable title="Characters" endpoint="Characters" fields={fields} />
     </div>
   );
 };

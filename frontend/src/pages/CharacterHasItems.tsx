@@ -15,7 +15,7 @@ const CharacterHasItems = () => {
   return (
     <CRUDTable
       title="Character Items"
-      endpoint="character-has-items"
+      endpoint="Character_has_Items"
       fields={fields}
     />
   );

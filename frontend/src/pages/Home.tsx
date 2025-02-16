@@ -13,8 +13,8 @@ const Home = () => {
           "Items",
           "Quests",
           "Chests",
-          "Character-Has-Items",
-          "Chest-Has-Items",
+          "Character_has_Items",
+          "Chest_has_Items",
         ].map((page) => (
           <Link
             key={page}

@@ -10,7 +10,7 @@ const Items = () => {
     { name: "quest_id", label: "Quest", type: "select", options: [] },
   ];
 
-  return <CRUDTable title="Items" endpoint="items" fields={fields} />;
+  return <CRUDTable title="Items" endpoint="Items" fields={fields} />;
 };
 
 export default Items;
