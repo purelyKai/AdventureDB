@@ -128,7 +128,7 @@ const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => {
   return (
     <div className="p-4 flex gap-8">
       <div className="w-1/3 p-4 border rounded shadow-lg">
-        <h2 className="text-lg font-bold mb-2">Add New Record</h2>
+        <h2 className="text-lg font-bold mb-2">Add New {title}</h2>
         {fields
           .filter((field) => !field.readOnly)
           .map((field) => (
