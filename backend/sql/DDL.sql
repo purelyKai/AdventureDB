@@ -1,5 +1,15 @@
-SET FOREIGN_KEY_CHECKS=0;
+-- Temporarily remove key checks and autocommit
+SET FOREIGN_KEY_CHECKS = 0;
 SET AUTOCOMMIT = 0;
+
+-- Remove tables if they already exist
+DROP TABLE IF EXISTS `Classes`;
+DROP TABLE IF EXISTS `Chests`;
+DROP TABLE IF EXISTS `Characters`;
+DROP TABLE IF EXISTS `Quests`;
+DROP TABLE IF EXISTS `Items`;
+DROP TABLE IF EXISTS `Character_has_Items`;
+DROP TABLE IF EXISTS `Chest_has_Items`;
 
 -- -----------------------------------------------------
 -- Create Table `Classes`
@@ -162,5 +172,15 @@ INSERT INTO `Chest_has_Items` (`chest_id`, `item_id`) VALUES
 (2, 1),
 (3, 2);
 
-SET FOREIGN_KEY_CHECKS=1;
+-- Display all table contents
+SELECT * FROM `Classes`;
+SELECT * FROM `Chests`;
+SELECT * FROM `Characters`;
+SELECT * FROM `Quests`;
+SELECT * FROM `Items`;
+SELECT * FROM `Character_has_Items`;
+SELECT * FROM `Chest_has_Items`;
+
+-- Reset key checks and autocommit
+SET FOREIGN_KEY_CHECKS = 1;
 COMMIT;

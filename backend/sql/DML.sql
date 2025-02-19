@@ -56,7 +56,7 @@ SELECT quest_id, quest_name AS name FROM Quests
   ORDER BY quest_name ASC;
 
 -- Query for retrieving all the item information and associated quest names, character names,
--- and chest coordiantes for the Item list page.
+-- and chest coordinates for the Item list page.
 SELECT Items.item_id, item_name AS name, item_description AS description,
     item_power AS power, item_range AS 'range', IFNULL(quest_name, '-') AS 'reward for quest',
     IFNULL(GROUP_CONCAT(DISTINCT character_name ORDER BY character_name ASC SEPARATOR ', '), '-')
@@ -137,27 +137,34 @@ INSERT INTO Chest_has_Items (chest_id, item_id)
 VALUES (:chest_id_from_dropdown_input, :item_id_from_dropdown_input);
 
 -- -----------------------------------------------------
--- DELETE Query
+-- DELETE Queries
 -- -----------------------------------------------------
+-- Query for removing a character with colon : character representing the variables
+-- that will have data from the backend programming language
+DELETE FROM Characters
+WHERE character_id = :character_id_selected_from_browse_characters_page;
+
 -- Query for removing an item association with a character from the Character_has_Items
 -- junction table with colon : character representing the variables that will have data
 -- from the backend programming language
 DELETE FROM Character_has_Items
-WHERE character_id = :character_id_from_dropdown_input
-  AND item_id = :item_id_from_dropdown_input;
+WHERE character_id = :character_id_selected_from_browse_character_has_items_page
+  AND item_id = :item_id_selected_from_browse_character_has_items_page;
 
 -- -----------------------------------------------------
 -- UPDATE Queries
 -- -----------------------------------------------------
--- Query for removing a character association wtih a quest by setting the foreign key
+-- Query for removing a character association with a quest by setting the foreign key
 -- character_id in the Quests table to null with colon : character representing the variables
 -- that will have data from the backend programming language
 UPDATE Quests
 SET character_id = NULL
-WHERE quest_id = :quest_id_from_dropdown_input;
+WHERE quest_id = :quest_id_selected_from_browse_quests_page;
 
--- Query for updating an item that a chest is associated with where the colon :
+-- Query for updating an item/character association where the colon :
 -- character represents the variables that will have data from the backend programming language
-UPDATE Chest_has_Items
-SET item_id = :item_id_from_dropdown_input
-WHERE chest_id = :chest_id_from_dropdown_input
+UPDATE Character_has_Items
+SET character_id = :character_id_from_dropdown_input,
+  item_id = :item_id_from_dropdown_input
+WHERE character_id = :character_id_selected_from_browse_character_has_items_page
+  AND item_id = :item_id_selected_from_browse_character_has_items_page;
