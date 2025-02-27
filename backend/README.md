@@ -1,12 +1,13 @@
 # Backend
 
-## .env
+## Setup
 
-Create a .env file with the following properties:
+Create a `.env` file with the properties detailed in `.env.local`.
 
-```
-DB_HOST=localhost
-DB_USER=root
-DB_PASSWORD=your_password
-DB_NAME=database_name
+## Start Server
+
+To start for the first time or restart with a new build, you will only need to run the master script:
+
+```bash
+npm run start:prod
 ```
