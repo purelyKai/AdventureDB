@@ -17,11 +17,19 @@ const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => {
   const { fetchData, createItem, updateItem, deleteItem, isLoading, error } =
     useApi(endpoint);
 
-  // Call useForeignKeyOptions for all fields upfront
-  const foreignKeyOptions = fields.map((field) => ({
-    fieldName: field.name,
-    options: useForeignKeyOptions(field.optionsEndpoint!, field.selectTarget!),
-  }));
+  // Get the primary key field (assuming it's the first field)
+  const primaryKeyField = fields[0];
+
+  // Call useForeignKeyOptions for all fields that are foreign keys
+  const foreignKeyOptions = fields
+    .filter((field) => field.foreignKey)
+    .map((field) => ({
+      fieldName: field.name,
+      options:
+        field.optionsEndpoint && field.selectTarget
+          ? useForeignKeyOptions(field.optionsEndpoint, field.selectTarget)
+          : [],
+    }));
 
   const loadData = useCallback(async () => {
     const result = await fetchData();
@@ -38,8 +46,10 @@ const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => {
 
   const handleSave = async (id: number, item: any) => {
     if (id === -1) {
+      // Creating a new item
       await createItem(item);
     } else {
+      // Editing an existing item
       await updateItem(id, item);
     }
     setEditingId(null);
@@ -58,7 +68,7 @@ const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => {
 
   const handleEditItemChange = (id: number, field: string, value: any) => {
     const updatedData = data.map((item) =>
-      item[fields[0].name] === id ? { ...item, [field]: value } : item
+      item[primaryKeyField.name] === id ? { ...item, [field]: value } : item
     );
     setData(updatedData);
   };
@@ -66,17 +76,20 @@ const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => {
   const renderInputField = (
     field: Field,
     value: any,
-    onChange: (value: any) => void
+    onChange: (value: any) => void,
+    isReadOnly: boolean = field.readOnly || false
   ) => {
-    const options =
-      foreignKeyOptions.find((option) => option.fieldName === field.name)
-        ?.options || [];
-    if (field.foreignKey) {
+    if (field.foreignKey && field.optionsEndpoint) {
+      const options =
+        foreignKeyOptions.find((option) => option.fieldName === field.name)
+          ?.options || [];
+
       return (
         <select
           value={value || ""}
           onChange={(e) => onChange(e.target.value)}
           className="w-full p-2 border rounded"
+          disabled={isReadOnly}
         >
           <option value="">Select {field.label}</option>
           {options.map((option) => (
@@ -93,10 +106,27 @@ const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => {
           value={value || ""}
           onChange={(e) => onChange(e.target.value)}
           className="w-full p-2 border rounded"
-          readOnly={field.readOnly}
+          readOnly={isReadOnly}
         />
       );
     }
+  };
+
+  // Function to display foreign key values properly
+  const displayFieldValue = (item: any, field: Field) => {
+    if (field.foreignKey && field.optionsEndpoint) {
+      const options =
+        foreignKeyOptions.find((option) => option.fieldName === field.name)
+          ?.options || [];
+
+      const option = options.find(
+        (opt) => opt.value === item[field.name]?.toString()
+      );
+
+      return option ? option.label : item[field.name];
+    }
+
+    return item[field.name];
   };
 
   if (isLoading) {
@@ -156,40 +186,46 @@ const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => {
           <tbody>
             {data.map((item) => (
               <tr
-                key={item[fields[0].name]}
+                key={item[primaryKeyField.name]}
                 className="border-t border-gray-300"
               >
                 {fields.map((field) => (
                   <td key={field.name} className="px-4 py-2">
-                    {editingId === item[fields[0].name]
-                      ? renderInputField(field, item[field.name], (value) =>
-                          handleEditItemChange(
-                            item[fields[0].name],
-                            field.name,
-                            value
-                          )
+                    {editingId === item[primaryKeyField.name]
+                      ? renderInputField(
+                          field,
+                          item[field.name],
+                          (value) =>
+                            handleEditItemChange(
+                              item[primaryKeyField.name],
+                              field.name,
+                              value
+                            ),
+                          field.name === primaryKeyField.name // Make primary key readonly during edit
                         )
-                      : item[field.name]}
+                      : displayFieldValue(item, field)}
                   </td>
                 ))}
                 <td className="px-4 py-2">
-                  {editingId === item[fields[0].name] ? (
+                  {editingId === item[primaryKeyField.name] ? (
                     <button
-                      onClick={() => handleSave(item[fields[0].name], item)}
+                      onClick={() =>
+                        handleSave(item[primaryKeyField.name], item)
+                      }
                       className="bg-green-500 text-white px-2 py-1 rounded mr-2"
                     >
                       Save
                     </button>
                   ) : (
                     <button
-                      onClick={() => handleEdit(item[fields[0].name])}
+                      onClick={() => handleEdit(item[primaryKeyField.name])}
                       className="bg-blue-500 text-white px-2 py-1 rounded mr-2"
                     >
                       Edit
                     </button>
                   )}
                   <button
-                    onClick={() => handleDelete(item[fields[0].name])}
+                    onClick={() => handleDelete(item[primaryKeyField.name])}
                     className="bg-red-500 text-white px-2 py-1 rounded"
                   >
                     Delete

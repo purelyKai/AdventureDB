@@ -13,15 +13,31 @@ export const useForeignKeyOptions = (
   useEffect(() => {
     const loadOptions = async () => {
       const data = await fetchData();
-      const formattedOptions = data.map((item: any) => ({
-        value: item.id.toString(),
-        label: item[selectTarget],
-      }));
-      setOptions(formattedOptions);
+
+      // If data exists and is an array
+      if (Array.isArray(data) && data.length > 0) {
+        // Determine the correct ID field name based on the endpoint
+        // This assumes your ID fields follow the pattern 'table_name_id'
+        const idField = `${
+          endpoint.toLowerCase().endsWith("s")
+            ? endpoint.slice(0, -1)
+            : endpoint
+        }_id`;
+
+        const formattedOptions = data.map((item: any) => ({
+          // Use the appropriate ID field if available, fallback to 'id'
+          value: (item[idField] || item.id).toString(),
+          label: item[selectTarget]
+            ? item[selectTarget].toString()
+            : `ID: ${item[idField] || item.id}`,
+        }));
+
+        setOptions(formattedOptions);
+      }
     };
 
     loadOptions();
-  }, [fetchData, selectTarget]);
+  }, [fetchData, selectTarget, endpoint]);
 
   return options;
 };
