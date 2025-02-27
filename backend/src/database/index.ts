@@ -3,16 +3,24 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-const pool = mysql.createPool({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  port: 3306,
-  ssl: { rejectUnauthorized: false },
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0,
-});
+async function createConnection() {
+  try {
+    const connection = await mysql.createConnection({
+      host: process.env.DB_HOST,
+      user: process.env.DB_USER,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_NAME,
+      port: 3306, // Explicitly set port
+      ssl: { rejectUnauthorized: false }, // Disable strict SSL
+    });
 
-export default pool;
+    console.log("Connected to database ✅");
+    return connection;
+  } catch (error) {
+    console.error("Database connection failed ❌", error);
+    throw error;
+  }
+}
+
+// Call `createConnection()` wherever you need a DB connection
+export default createConnection;
