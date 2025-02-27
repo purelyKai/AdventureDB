@@ -27,8 +27,7 @@ app.get("/api/:endpoint", async (req: Request, res: Response) => {
   try {
     const { endpoint } = req.params;
     console.log("Fetching from table:", endpoint);
-    const connection = await db();
-    const [results] = await connection.execute(`SELECT * FROM ??`, [endpoint]);
+    const [results] = await db.query(`SELECT * FROM ??`, [endpoint]);
     res.json(results);
   } catch (err) {
     console.error("Database query error:", err);
@@ -48,11 +47,8 @@ app.post("/api/:endpoint", async (req: Request, res: Response) => {
     const query = `INSERT INTO ?? (${columns.join(
       ", "
     )}) VALUES (${placeholders})`;
-    const connection = await db();
-    const [result]: any = await connection.execute(query, [
-      endpoint,
-      ...values,
-    ]);
+
+    const [result]: any = await db.query(query, [endpoint, ...values]);
     res.json({ id: result.insertId, ...newRecord });
   } catch (err) {
     res.status(500).json({ message: "Error creating record", error: err });
@@ -69,9 +65,9 @@ app.put("/api/:endpoint/:id", async (req: Request, res: Response) => {
       .map((key) => `${key} = ?`)
       .join(", ");
     const values = Object.values(updatedRecord);
-    const connection = await db();
+
     const query = `UPDATE ?? SET ${updateFields} WHERE id = ?`;
-    await connection.execute(query, [endpoint, ...values, id]);
+    await db.query(query, [endpoint, ...values, id]);
 
     res.json({ message: "Record updated", updatedRecord });
   } catch (err) {
@@ -83,9 +79,9 @@ app.put("/api/:endpoint/:id", async (req: Request, res: Response) => {
 app.delete("/api/:endpoint/:id", async (req: Request, res: Response) => {
   try {
     const { endpoint, id } = req.params;
-    const connection = await db();
+
     const query = `DELETE FROM ?? WHERE id = ?`;
-    await connection.execute(query, [endpoint, id]);
+    await db.query(query, [endpoint, id]);
 
     res.json({ message: "Record deleted" });
   } catch (err) {
