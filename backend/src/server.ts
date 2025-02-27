@@ -105,17 +105,23 @@ app.put(
           .json({ message: "Request body cannot be empty" });
       }
 
+      const primaryKeyColumn = `${
+        endpoint.toLowerCase().endsWith("es")
+          ? endpoint.slice(0, -2)
+          : endpoint.slice(0, -1)
+      }_id`;
+
       const columns = Object.keys(updatedRecord);
       const values = Object.values(updatedRecord);
 
       const setClause = columns.map(() => "?? = ?").join(", ");
-      const query = `UPDATE ?? SET ${setClause} WHERE id = ?`;
+      const query = `UPDATE ?? SET ${setClause} WHERE ?? = ?`;
 
       const params: any[] = [endpoint];
       columns.forEach((col, i) => {
         params.push(col, values[i]);
       });
-      params.push(id);
+      params.push(primaryKeyColumn, id);
 
       const [result]: any = await db.query(query, params);
 
@@ -139,9 +145,17 @@ app.delete(
     try {
       const { endpoint, id } = req.params;
 
-      const query = `DELETE FROM ?? WHERE id = ?`;
+      const primaryKeyColumn = `${
+        endpoint.toLowerCase().endsWith("es")
+          ? endpoint.slice(0, -2)
+          : endpoint.slice(0, -1)
+      }_id`;
 
-      const [result]: any = await db.query(query, [endpoint, id]);
+      const params: any[] = [endpoint, primaryKeyColumn, id];
+
+      const query = `DELETE FROM ?? WHERE ?? = ?`;
+
+      const [result]: any = await db.query(query, params);
 
       if (result.affectedRows === 0) {
         return res.status(404).json({ message: "Record not found" });
