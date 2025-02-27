@@ -12,32 +12,53 @@ export const useForeignKeyOptions = (
 
   useEffect(() => {
     const loadOptions = async () => {
-      const data = await fetchData();
+      try {
+        const data = await fetchData();
 
-      // If data exists and is an array
-      if (Array.isArray(data) && data.length > 0) {
-        // Determine the correct ID field name based on the endpoint
-        // This assumes your ID fields follow the pattern 'table_name_id'
-        const idField = `${
-          endpoint.toLowerCase().endsWith("s")
-            ? endpoint.slice(0, -1)
-            : endpoint
-        }_id`;
+        if (!data || !Array.isArray(data) || data.length === 0) {
+          console.warn(
+            `No data received from ${endpoint} for foreign key options`
+          );
+          return;
+        }
 
-        const formattedOptions = data.map((item: any) => ({
-          // Use the appropriate ID field if available, fallback to 'id'
-          value: (item[idField] || item.id).toString(),
-          label: item[selectTarget]
-            ? item[selectTarget].toString()
-            : `ID: ${item[idField] || item.id}`,
-        }));
+        // Get first item to determine id field
+        const firstItem = data[0];
+        // Find the ID field (ends with _id)
+        const idFieldName = Object.keys(firstItem).find(
+          (key) =>
+            key.endsWith("_id") &&
+            key.includes(endpoint.toLowerCase().replace(/_/g, "").slice(0, -1))
+        );
+
+        const formattedOptions = data.map((item: any) => {
+          // Get correct ID field
+          const idField = idFieldName || Object.keys(firstItem)[0]; // Fallback to first column
+          // Get label field - make sure item has the target field
+          const labelValue =
+            item[selectTarget] !== undefined
+              ? item[selectTarget]
+              : `${endpoint} ${item[idField]}`;
+
+          return {
+            value: String(item[idField]),
+            label: String(labelValue),
+          };
+        });
 
         setOptions(formattedOptions);
+        console.log(
+          `Loaded ${formattedOptions.length} options for ${endpoint}:`,
+          formattedOptions
+        );
+      } catch (error) {
+        console.error(`Error loading options for ${endpoint}:`, error);
+        setOptions([]);
       }
     };
 
     loadOptions();
-  }, [fetchData, selectTarget, endpoint]);
+  }, [fetchData, endpoint, selectTarget]);
 
   return options;
 };

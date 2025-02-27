@@ -40,6 +40,16 @@ const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => {
     loadData();
   }, [loadData]);
 
+  useEffect(() => {
+    foreignKeyOptions.forEach((option) => {
+      console.log(`Options for ${option.fieldName}:`, option.options);
+    });
+  }, [foreignKeyOptions]);
+
+  useEffect(() => {
+    console.log("Table data loaded:", data);
+  }, [data]);
+
   const handleEdit = (id: number) => {
     setEditingId(id);
   };
@@ -77,16 +87,20 @@ const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => {
     field: Field,
     value: any,
     onChange: (value: any) => void,
-    isReadOnly: boolean = field.readOnly || false
+    isReadOnly: boolean = false
   ) => {
     if (field.foreignKey && field.optionsEndpoint) {
       const options =
         foreignKeyOptions.find((option) => option.fieldName === field.name)
           ?.options || [];
 
+      // Convert value to string to match option format
+      const stringValue =
+        value !== null && value !== undefined ? String(value) : "";
+
       return (
         <select
-          value={value || ""}
+          value={stringValue}
           onChange={(e) => onChange(e.target.value)}
           className="w-full p-2 border rounded"
           disabled={isReadOnly}
