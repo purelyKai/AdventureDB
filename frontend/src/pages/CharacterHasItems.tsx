@@ -14,6 +14,7 @@ const CharacterHasItems = () => {
       type: "select",
       foreignKey: true,
       optionsEndpoint: "Characters",
+      selectTarget: "character_name",
     },
     {
       name: "item_id",
@@ -21,6 +22,7 @@ const CharacterHasItems = () => {
       type: "select",
       foreignKey: true,
       optionsEndpoint: "Items",
+      selectTarget: "item_name",
     },
   ];
 

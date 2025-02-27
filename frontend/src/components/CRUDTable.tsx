@@ -11,6 +11,7 @@ export interface Field {
   readOnly?: boolean;
   foreignKey?: boolean;
   optionsEndpoint?: string;
+  selectTarget?: string;
 }
 
 export interface CRUDTableProps {
