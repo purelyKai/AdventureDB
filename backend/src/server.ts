@@ -6,7 +6,7 @@ import db from "./database/databaseConnector";
 dotenv.config();
 
 const app = express();
-const PORT = process.env.VITE_PORT || 3524;
+const PORT = process.env.PORT || 3544;
 
 // List of allowed tables/endpoints
 const ALLOWED_TABLES = [

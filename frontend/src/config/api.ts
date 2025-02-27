@@ -7,7 +7,7 @@ interface ApiConfig {
 
 const config: ApiConfig = {
   LOCAL_API_URL:
-    import.meta.env.VITE_LOCAL_API_URL || "http://localhost:3001/api/",
+    import.meta.env.VITE_LOCAL_API_URL || "http://localhost:3544/api/",
   PRODUCTION_API_URL: import.meta.env.VITE_PRODUCTION_API_URL || "",
   USE_LOCAL_API: import.meta.env.VITE_USE_LOCAL_API === "true",
 };
