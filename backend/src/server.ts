@@ -1,15 +1,34 @@
-import express, { Request, Response } from "express";
+import express, { Request, Response, NextFunction } from "express";
 import dotenv from "dotenv";
 import cors from "cors";
-import db from "./database";
-import fs from "fs";
-import path from "path";
-import { Data } from "./types/types";
+import db from "./database/databaseConnector";
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.VITE_PORT || 3524;
+
+// List of allowed tables/endpoints
+const ALLOWED_TABLES = [
+  `Classes`,
+  `Chests`,
+  `Characters`,
+  `Quests`,
+  `Items`,
+  `Character_has_Items`,
+  `Chest_has_Items`,
+];
+
+// Middleware for validating table names
+const validateTableName = (req: Request, res: Response, next: NextFunction) => {
+  const { endpoint } = req.params;
+
+  if (!ALLOWED_TABLES.includes(endpoint)) {
+    return res.status(404).json({ message: "Resource not found" });
+  }
+
+  next();
+};
 
 app.use(cors());
 app.use(express.json());
@@ -18,75 +37,132 @@ app.get("/", (_req: Request, res: Response) => {
   res.send("Express server is running");
 });
 
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
-});
-
 // Fetch all records from a table
-app.get("/api/:endpoint", async (req: Request, res: Response) => {
-  try {
-    const { endpoint } = req.params;
-    console.log("Fetching from table:", endpoint);
-    const [results] = await db.query(`SELECT * FROM ??`, [endpoint]);
-    res.json(results);
-  } catch (err) {
-    console.error("Database query error:", err);
-    res.status(500).json({ message: "Error fetching data", error: err });
+app.get(
+  "/api/:endpoint",
+  validateTableName,
+  async (req: Request, res: Response) => {
+    try {
+      const { endpoint } = req.params;
+      console.log("Fetching from table:", endpoint);
+
+      const query = `SELECT * FROM ??`;
+
+      const [results] = await db.query(query, [endpoint]);
+      res.json(results);
+    } catch (err) {
+      console.error("Database query error:", err);
+      res.status(500).json({ message: "Error fetching data" });
+    }
   }
-});
+);
 
 // Insert a new record
-app.post("/api/:endpoint", async (req: Request, res: Response) => {
-  try {
-    const { endpoint } = req.params;
-    const newRecord = req.body;
+app.post(
+  "/api/:endpoint",
+  validateTableName,
+  async (req: Request, res: Response) => {
+    try {
+      const { endpoint } = req.params;
+      const newRecord = req.body;
 
-    const columns = Object.keys(newRecord);
-    const values = Object.values(newRecord);
-    const placeholders = columns.map(() => "?").join(", ");
-    const query = `INSERT INTO ?? (${columns.join(
-      ", "
-    )}) VALUES (${placeholders})`;
+      if (!newRecord || Object.keys(newRecord).length === 0) {
+        return res
+          .status(400)
+          .json({ message: "Request body cannot be empty" });
+      }
 
-    const [result]: any = await db.query(query, [endpoint, ...values]);
-    res.json({ id: result.insertId, ...newRecord });
-  } catch (err) {
-    res.status(500).json({ message: "Error creating record", error: err });
+      const columns = Object.keys(newRecord);
+      const values = Object.values(newRecord);
+      const placeholders = columns.map(() => "?").join(", ");
+
+      const query = `INSERT INTO ?? (${columns
+        .map(() => "??")
+        .join(", ")}) VALUES (${placeholders})`;
+      const params = [endpoint, ...columns, ...values];
+
+      const [result]: any = await db.query(query, params);
+      res.status(201).json({ id: result.insertId, ...newRecord });
+    } catch (err) {
+      console.error("Database insert error:", err);
+      res.status(400).json({ message: "Error creating record" });
+    }
   }
-});
+);
 
 // Update a record by ID
-app.put("/api/:endpoint/:id", async (req: Request, res: Response) => {
-  try {
-    const { endpoint, id } = req.params;
-    const updatedRecord = req.body;
+app.put(
+  "/api/:endpoint/:id",
+  validateTableName,
+  async (req: Request, res: Response) => {
+    try {
+      const { endpoint, id } = req.params;
+      const updatedRecord = req.body;
 
-    const updateFields = Object.keys(updatedRecord)
-      .map((key) => `${key} = ?`)
-      .join(", ");
-    const values = Object.values(updatedRecord);
+      if (!updatedRecord || Object.keys(updatedRecord).length === 0) {
+        return res
+          .status(400)
+          .json({ message: "Request body cannot be empty" });
+      }
 
-    const query = `UPDATE ?? SET ${updateFields} WHERE id = ?`;
-    await db.query(query, [endpoint, ...values, id]);
+      const columns = Object.keys(updatedRecord);
+      const values = Object.values(updatedRecord);
 
-    res.json({ message: "Record updated", updatedRecord });
-  } catch (err) {
-    res.status(500).json({ message: "Error updating record", error: err });
+      const setClause = columns.map(() => "?? = ?").join(", ");
+      const query = `UPDATE ?? SET ${setClause} WHERE id = ?`;
+
+      const params: any[] = [endpoint];
+      columns.forEach((col, i) => {
+        params.push(col, values[i]);
+      });
+      params.push(id);
+
+      const [result]: any = await db.query(query, params);
+
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ message: "Record not found" });
+      }
+
+      res.json({ message: "Record updated successfully" });
+    } catch (err) {
+      console.error("Database update error:", err);
+      res.status(400).json({ message: "Error updating record" });
+    }
   }
-});
+);
 
 // Delete a record by ID
-app.delete("/api/:endpoint/:id", async (req: Request, res: Response) => {
-  try {
-    const { endpoint, id } = req.params;
+app.delete(
+  "/api/:endpoint/:id",
+  validateTableName,
+  async (req: Request, res: Response) => {
+    try {
+      const { endpoint, id } = req.params;
 
-    const query = `DELETE FROM ?? WHERE id = ?`;
-    await db.query(query, [endpoint, id]);
+      const query = `DELETE FROM ?? WHERE id = ?`;
 
-    res.json({ message: "Record deleted" });
-  } catch (err) {
-    res.status(500).json({ message: "Error deleting record", error: err });
+      const [result]: any = await db.query(query, [endpoint, id]);
+
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ message: "Record not found" });
+      }
+
+      res.json({ message: "Record deleted successfully" });
+    } catch (err) {
+      console.error("Database delete error:", err);
+      res.status(400).json({ message: "Error deleting record" });
+    }
   }
+);
+
+// Global error handler
+app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+  console.error("Server error:", err);
+  res.status(500).json({ message: "Internal server error" });
+});
+
+app.listen(PORT, () => {
+  console.log(`Server is running on http://localhost:${PORT}`);
 });
 
 export default app;
