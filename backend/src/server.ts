@@ -6,8 +6,7 @@ import db from "./database/databaseConnector";
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || "8179";
-console.log(PORT);
+const PORT = process.env.PORT || "8379";
 
 // List of allowed tables/endpoints
 const ALLOWED_TABLES = [
@@ -177,7 +176,9 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+  console.log(
+    `Server is running on http://classwork.engr.oregonstate.edu:${PORT}`
+  );
 });
 
 export default app;
