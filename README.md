@@ -41,7 +41,7 @@ npm run start:prod
 
 ```bash
 cd frontend
-npm run build
+npm run start:prod
 ```
 
 ## 🛠️ Tech Stack
