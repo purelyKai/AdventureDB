@@ -7,10 +7,20 @@
     "dev": "vite",
     "build": "tsc -b && vite build --emptyOutDir",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "start:forever": "forever start reactServer.cjs",
+    "stop:forever": "forever stop reactServer.cjs",
+    "restart:forever": "forever restart reactServer.cjs",
+    "list:forever": "forever list",
+    "logs:forever": "forever logs",
+    "setup:logs": "mkdir -p logs",
+    "start:prod": "npm run build && mkdir -p logs && forever stop reactServer.cjs || true && forever start --append -l forever.log -o logs/out.log -e logs/error.log --minUptime 5000 --spinSleepTime 5000 reactServer.cjs -- --host"
   },
   "dependencies": {
     "axios": "^1.3.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "forever": "^4.0.3",
     "lucide-react": "^0.476.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
