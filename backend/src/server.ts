@@ -46,9 +46,10 @@ app.get(
       const { endpoint } = req.params;
       console.log("Fetching from table:", endpoint);
 
-      const query = `SELECT * FROM ??`;
+      const primaryKeyColumn = getPrimaryKeyColumn(endpoint);
+      const query = `SELECT * FROM ?? ORDER BY ??`;
 
-      const [results] = await db.query(query, [endpoint]);
+      const [results] = await db.query(query, [endpoint, primaryKeyColumn]);
       res.json(results);
     } catch (err) {
       console.error("Database query error:", err);
