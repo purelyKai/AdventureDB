@@ -46,9 +46,10 @@ app.get(
       const { endpoint } = req.params;
       console.log("Fetching from table:", endpoint);
 
-      const query = `SELECT * FROM ??`;
+      const primaryKeyColumn = getPrimaryKeyColumn(endpoint);
+      const query = `SELECT * FROM ?? ORDER BY ??`;
 
-      const [results] = await db.query(query, [endpoint]);
+      const [results] = await db.query(query, [endpoint, primaryKeyColumn]);
       res.json(results);
     } catch (err) {
       console.error("Database query error:", err);
@@ -105,12 +106,7 @@ app.put(
           .json({ message: "Request body cannot be empty" });
       }
 
-      const primaryKeyColumn = `${
-        endpoint.toLowerCase().endsWith("es")
-          ? endpoint.slice(0, -2)
-          : endpoint.slice(0, -1)
-      }_id`;
-
+      const primaryKeyColumn = getPrimaryKeyColumn(endpoint);
       const columns = Object.keys(updatedRecord);
       const values = Object.values(updatedRecord);
 
@@ -145,11 +141,7 @@ app.delete(
     try {
       const { endpoint, id } = req.params;
 
-      const primaryKeyColumn = `${
-        endpoint.toLowerCase().endsWith("es")
-          ? endpoint.slice(0, -2)
-          : endpoint.slice(0, -1)
-      }_id`;
+      const primaryKeyColumn = getPrimaryKeyColumn(endpoint);
 
       const params: any[] = [endpoint, primaryKeyColumn, id];
 
@@ -168,6 +160,28 @@ app.delete(
     }
   }
 );
+
+// Returns a string corresponding to the name of the primary key
+// column for the given endpoint
+function getPrimaryKeyColumn(endpoint: string)
+{
+  var primaryKeyColumn = '';
+  var endpointLower = endpoint.toLowerCase();
+
+  // If endpoint is an intersection table, key column is the name of the table
+  if(endpoint.includes('_')) {
+    primaryKeyColumn = endpointLower;
+  }
+  // If not an intersection table, remove plural values since key column isn't plural
+  else if(endpointLower.endsWith("es")) {
+    primaryKeyColumn = endpoint.slice(0, -2)
+  }
+  else {
+    primaryKeyColumn = endpoint.slice(0, -1);
+  }
+
+  return primaryKeyColumn + '_id';
+}
 
 // Global error handler
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
