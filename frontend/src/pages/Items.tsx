@@ -35,6 +35,7 @@ const Items = () => {
       foreignKey: true,
       optionsEndpoint: "Quests",
       selectTarget: "quest_name",
+      selectNone: true,
     },
   ];
 

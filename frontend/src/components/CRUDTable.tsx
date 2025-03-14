@@ -12,6 +12,7 @@ interface CRUDTableProps {
 
 const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => {
   const [data, setData] = useState<any[]>([]);
+  const [originalData, setOriginalData] = useState<any[]>([]);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [newItem, setNewItem] = useState<any>({});
   const { fetchData, createItem, updateItem, deleteItem, isLoading, error } =
@@ -34,6 +35,7 @@ const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => {
   const loadData = useCallback(async () => {
     const result = await fetchData();
     setData(result);
+    setOriginalData(JSON.parse(JSON.stringify(result))); // Deep copy to keep original state
   }, [fetchData]);
 
   useEffect(() => {
@@ -51,16 +53,39 @@ const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => {
   }, [data]);
 
   const handleEdit = (id: number) => {
+    // Store the current state before editing begins
+    setOriginalData(JSON.parse(JSON.stringify(data)));
     setEditingId(id);
   };
 
+  const handleCancelEdit = () => {
+    // Restore the original data from before the edit
+    setData(originalData);
+    setEditingId(null);
+  };
+
   const handleSave = async (id: number, item: any) => {
+    // Process any "__none__" values to null before saving
+    const processedItem = { ...item };
+
+    // Find fields with selectNone=true
+    const selectNoneFields = fields
+      .filter((field) => field.selectNone)
+      .map((field) => field.name);
+
+    // Convert "__none__" to null for these fields
+    selectNoneFields.forEach((fieldName) => {
+      if (processedItem[fieldName] === "__none__") {
+        processedItem[fieldName] = null;
+      }
+    });
+
     if (id === -1) {
       // Creating a new item
-      await createItem(item);
+      await createItem(processedItem);
     } else {
       // Editing an existing item
-      await updateItem(id, item);
+      await updateItem(id, processedItem);
     }
     setEditingId(null);
     setNewItem({});
@@ -73,10 +98,16 @@ const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => {
   };
 
   const handleNewItemChange = (field: string, value: any) => {
+    // Prevent empty string values from being set (from the placeholder)
+    if (value === "") return;
+
     setNewItem({ ...newItem, [field]: value });
   };
 
   const handleEditItemChange = (id: number, field: string, value: any) => {
+    // Prevent empty string values from being set (from the placeholder)
+    if (value === "") return;
+
     const updatedData = data.map((item) =>
       item[primaryKeyField.name] === id ? { ...item, [field]: value } : item
     );
@@ -94,18 +125,28 @@ const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => {
         foreignKeyOptions.find((option) => option.fieldName === field.name)
           ?.options || [];
 
-      // Convert value to string to match option format
-      const stringValue =
-        value !== null && value !== undefined ? String(value) : "";
+      // If the value is null and selectNone is true, use "__none__" as the value
+      let currentValue = value;
+      if (value === null && field.selectNone) {
+        currentValue = "__none__";
+      }
 
       return (
         <select
-          value={stringValue}
+          value={currentValue !== undefined ? String(currentValue) : ""}
           onChange={(e) => onChange(e.target.value)}
           className="w-full p-2 border rounded"
           disabled={isReadOnly}
+          required={!field.selectNone} // Required unless "None" is an option
         >
-          <option value="">Select {field.label}</option>
+          {/* Non-selectable placeholder option */}
+          <option value="" disabled className="text-gray-500">
+            -- Select a {field.label} --
+          </option>
+
+          {/* Add "None" option if selectNone is true */}
+          {field.selectNone && <option value="__none__">None</option>}
+
           {options.map((option) => (
             <option key={option.value} value={option.value}>
               {option.label}
@@ -129,12 +170,17 @@ const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => {
   // Function to display foreign key values properly
   const displayFieldValue = (item: any, field: Field) => {
     if (field.foreignKey && field.optionsEndpoint) {
+      // If the field value is null and selectNone is true, display "None"
+      if (item[field.name] === null && field.selectNone) {
+        return "None";
+      }
+
       const options =
         foreignKeyOptions.find((option) => option.fieldName === field.name)
           ?.options || [];
 
       const option = options.find(
-        (opt) => opt.value === item[field.name]?.toString()
+        (opt) => opt.value === String(item[field.name])
       );
 
       return option ? option.label : item[field.name];
@@ -222,14 +268,22 @@ const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => {
                 ))}
                 <td className="px-4 py-2">
                   {editingId === item[primaryKeyField.name] ? (
-                    <button
-                      onClick={() =>
-                        handleSave(item[primaryKeyField.name], item)
-                      }
-                      className="bg-green-500 text-white px-2 py-1 rounded mr-2"
-                    >
-                      Save
-                    </button>
+                    <>
+                      <button
+                        onClick={() =>
+                          handleSave(item[primaryKeyField.name], item)
+                        }
+                        className="bg-green-500 text-white px-2 py-1 rounded mr-2"
+                      >
+                        Save
+                      </button>
+                      <button
+                        onClick={() => handleCancelEdit()}
+                        className="bg-gray-500 text-white px-2 py-1 rounded mr-2"
+                      >
+                        Cancel
+                      </button>
+                    </>
                   ) : (
                     <button
                       onClick={() => handleEdit(item[primaryKeyField.name])}

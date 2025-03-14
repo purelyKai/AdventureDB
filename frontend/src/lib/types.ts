@@ -6,4 +6,5 @@ export interface Field {
   foreignKey?: boolean;
   optionsEndpoint?: string;
   selectTarget?: string;
+  selectNone?: boolean;
 }

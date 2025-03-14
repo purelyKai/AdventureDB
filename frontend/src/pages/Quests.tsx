@@ -25,6 +25,7 @@ const Quests = () => {
       foreignKey: true,
       optionsEndpoint: "Characters",
       selectTarget: "character_name",
+      selectNone: true,
     },
   ];
 
