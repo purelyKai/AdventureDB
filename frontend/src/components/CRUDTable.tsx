@@ -55,16 +55,25 @@ const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => {
   };
 
   const handleSave = async (id: number, item: any) => {
-    if (id === -1) {
-      // Creating a new item
-      await createItem(item);
-    } else {
-      // Editing an existing item
-      await updateItem(id, item);
+    if(formInputIsValid()) {
+      if (id === -1) {
+        // Creating a new item
+        await createItem(item);
+      } else {
+        // Editing an existing item
+        await updateItem(id, item);
+      }
+      setEditingId(null);
+      setNewItem({});
+      loadData();
     }
-    setEditingId(null);
-    setNewItem({});
-    loadData();
+  };
+
+  // Checks if the values entered into the editing form are valid
+  const formInputIsValid = () =>
+  {
+      const form = document.getElementById("tableForm") as HTMLFormElement;
+      return (form && form.checkValidity());
   };
 
   const handleDelete = async (id: number) => {
@@ -93,7 +102,10 @@ const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => {
       const options =
         foreignKeyOptions.find((option) => option.fieldName === field.name)
           ?.options || [];
-
+      
+      // Prompt user to select value if not optional, otherwise set to none
+      const defaultSelectLabel = field.optional ? "None" : "Select " + field.label;
+        
       // Convert value to string to match option format
       const stringValue =
         value !== null && value !== undefined ? String(value) : "";
@@ -104,8 +116,9 @@ const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => {
           onChange={(e) => onChange(e.target.value)}
           className="w-full p-2 border rounded"
           disabled={isReadOnly}
+          required={!field.optional}
         >
-          <option value="">Select {field.label}</option>
+          <option value="" disabled={!field.optional}>{defaultSelectLabel}</option>
           {options.map((option) => (
             <option key={option.value} value={option.value}>
               {option.label}
@@ -121,6 +134,7 @@ const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => {
           onChange={(e) => onChange(e.target.value)}
           className="w-full p-2 border rounded"
           readOnly={isReadOnly}
+          required={!field.optional}
         />
       );
     }
@@ -184,72 +198,75 @@ const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => {
       </div>
 
       {/* Table */}
-      <div className="w-2/3">
-        <h2 className="text-2xl font-bold mb-4">{title}</h2>
-        <table className="min-w-full bg-white border border-gray-300">
-          <thead>
-            <tr className="bg-gray-100">
-              {fields.map((field) => (
-                <th key={field.name} className="px-4 py-2 text-left">
-                  {field.label}
-                </th>
-              ))}
-              <th className="px-4 py-2 text-left">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {data.map((item) => (
-              <tr
-                key={item[primaryKeyField.name]}
-                className="border-t border-gray-300"
-              >
+      <form id="tableForm" className="w-2/3">
+        <div>
+          <h2 className="text-2xl font-bold mb-4">{title}</h2>
+          <table className="min-w-full bg-white border border-gray-300">
+            <thead>
+              <tr className="bg-gray-100">
                 {fields.map((field) => (
-                  <td key={field.name} className="px-4 py-2">
-                    {editingId === item[primaryKeyField.name]
-                      ? renderInputField(
-                          field,
-                          item[field.name],
-                          (value) =>
-                            handleEditItemChange(
-                              item[primaryKeyField.name],
-                              field.name,
-                              value
-                            ),
-                          field.name === primaryKeyField.name // Make primary key readonly during edit
-                        )
-                      : displayFieldValue(item, field)}
-                  </td>
+                  <th key={field.name} className="px-4 py-2 text-left">
+                    {field.label}
+                  </th>
                 ))}
-                <td className="px-4 py-2">
-                  {editingId === item[primaryKeyField.name] ? (
-                    <button
-                      onClick={() =>
-                        handleSave(item[primaryKeyField.name], item)
-                      }
-                      className="bg-green-500 text-white px-2 py-1 rounded mr-2"
-                    >
-                      Save
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => handleEdit(item[primaryKeyField.name])}
-                      className="bg-blue-500 text-white px-2 py-1 rounded mr-2"
-                    >
-                      Edit
-                    </button>
-                  )}
-                  <button
-                    onClick={() => handleDelete(item[primaryKeyField.name])}
-                    className="bg-red-500 text-white px-2 py-1 rounded"
-                  >
-                    Delete
-                  </button>
-                </td>
+                <th className="px-4 py-2 text-left">Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {data.map((item) => (
+                <tr
+                  key={item[primaryKeyField.name]}
+                  className="border-t border-gray-300"
+                >
+                  {fields.map((field) => (
+                    <td key={field.name} className="px-4 py-2">
+                      {editingId === item[primaryKeyField.name]
+                        ? renderInputField(
+                            field,
+                            item[field.name],
+                            (value) =>
+                              handleEditItemChange(
+                                item[primaryKeyField.name],
+                                field.name,
+                                value
+                              ),
+                            field.name === primaryKeyField.name // Make primary key readonly during edit
+                          )
+                        : displayFieldValue(item, field)}
+                    </td>
+                  ))}
+                  <td className="px-4 py-2">
+                    {editingId === item[primaryKeyField.name] ? (
+                      <button
+                        onClick={() =>
+                          handleSave(item[primaryKeyField.name], item)
+                        }
+                        className="bg-green-500 text-white px-2 py-1 rounded mr-2"
+                        type="submit"
+                      >
+                        Save
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => handleEdit(item[primaryKeyField.name])}
+                        className="bg-blue-500 text-white px-2 py-1 rounded mr-2"
+                      >
+                        Edit
+                      </button>
+                    )}
+                    <button
+                      onClick={() => handleDelete(item[primaryKeyField.name])}
+                      className="bg-red-500 text-white px-2 py-1 rounded"
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </form>
     </div>
   );
 };
