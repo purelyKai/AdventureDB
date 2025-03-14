@@ -81,11 +81,15 @@ const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => {
     loadData();
   };
 
-  const handleNewItemChange = (field: string, value: any) => {
+  const handleNewItemChange = (field: string, value: any, isForeignKey: boolean) => {
+    // If dropdown is set to the default, set value to null
+    value = isForeignKey && value == "" ? null : value;
     setNewItem({ ...newItem, [field]: value });
   };
 
-  const handleEditItemChange = (id: number, field: string, value: any) => {
+  const handleEditItemChange = (id: number, field: string, value: any, isForeignKey: boolean) => {
+    // If dropdown is set to the default, set value to null
+    value = isForeignKey && value == "" ? null : value;
     const updatedData = data.map((item) =>
       item[primaryKeyField.name] === id ? { ...item, [field]: value } : item
     );
@@ -184,7 +188,7 @@ const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => {
                   {field.label}
                 </label>
                 {renderInputField(field, newItem[field.name], (value) =>
-                  handleNewItemChange(field.name, value)
+                  handleNewItemChange(field.name, value, field.foreignKey == true)
                 )}
               </div>
             ))}
@@ -228,7 +232,8 @@ const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => {
                               handleEditItemChange(
                                 item[primaryKeyField.name],
                                 field.name,
-                                value
+                                value,
+                                field.foreignKey == true,
                               ),
                             field.name === primaryKeyField.name // Make primary key readonly during edit
                           )
