@@ -125,52 +125,81 @@ CREATE TABLE IF NOT EXISTS `Chest_has_Items` (
 );
 
 -- Inserting sample data into 'Classes' table
-INSERT INTO `Classes` (`class_id`, `class_name`, `class_description`) VALUES
-(1, 'Wizard', 'Harness the power of magic and unleash your wrath'),
-(2, 'Undead', 'Live past death and carry on into the next life'),
-(3, 'Human', 'Regular human with nothing special');
+INSERT INTO `Classes` (`class_name`, `class_description`) VALUES
+('Wizard', 'Harness the power of magic and unleash your wrath'),
+('Undead', 'Live past death and carry on into the next life'),
+('Human', 'Regular human with nothing special');
 
 -- Inserting sample data into 'Chests' table
-INSERT INTO `Chests` (`chest_id`, `chest_x_coordinate`, `chest_y_coordinate`) VALUES
-(1, 50.0, 90.0),
-(2, 300.5, 20.5),
-(3, 750.5, 320.25);
+INSERT INTO `Chests` (`chest_x_coordinate`, `chest_y_coordinate`) VALUES
+(50.0, 90.0),
+(300.5, 20.5),
+(750.5, 320.25);
 
 -- Inserting sample data into 'Characters' table
-INSERT INTO `Characters` (`character_id`, `character_name`, `class_id`) VALUES
-(1, 'magic4Life', 1),
-(2, 'sorceryIsWild99', 1),
-(3, 'simpleHuman29', 3),
-(4, 'fastHuman36', 3);
+INSERT INTO `Characters` (`character_name`, `class_id`) VALUES
+('magic4Life', (SELECT `class_id` FROM `Classes` WHERE `class_name` = 'Wizard')),
+('sorceryIsWild99', (SELECT `class_id` FROM `Classes` WHERE `class_name` = 'Wizard')),
+('simpleHuman29', (SELECT `class_id` FROM `Classes` WHERE `class_name` = 'Human')),
+('fastHuman36', (SELECT `class_id` FROM `Classes` WHERE `class_name` = 'Human'));
 
 -- Inserting sample data into 'Quests' table
-INSERT INTO `Quests` (`quest_id`, `quest_name`, `quest_description`, `character_id`) VALUES
-(1, 'Save the village', 'Release the villagers from the prisons and stop the pillaging of their town', 2),
-(2, 'Supreme gardening', 'Garden 100 acres of land and harvest crops for the villagers', 2),
-(3, 'Find the lost cave', 'Search the lands between to find the hidden cave that holds unknown treasures', NULL),
-(4, 'Slay the wild beast', 'Harness the power of your weapons to slay the mighty beast', 3);
+INSERT INTO `Quests` (`quest_name`, `quest_description`, `character_id`) VALUES 
+('Save the village', 'Release the villagers from the prisons and stop the pillaging of their town', 
+  (SELECT `character_id` FROM `Characters` WHERE `character_name` = 'sorceryIsWild99')),
+('Supreme gardening', 'Garden 100 acres of land and harvest crops for the villagers', 
+  (SELECT `character_id` FROM `Characters` WHERE `character_name` = 'sorceryIsWild99')),
+('Find the lost cave', 'Search the lands between to find the hidden cave that holds unknown treasures', NULL),
+('Slay the wild beast', 'Harness the power of your weapons to slay the mighty beast', 
+  (SELECT `character_id` FROM `Characters` WHERE `character_name` = 'simpleHuman29'));
 
 -- Inserting sample data into 'Items' table
-INSERT INTO `Items` (`item_id`, `item_name`, `item_description`, `item_power`, `item_range`, `quest_id`) VALUES
-(1, 'Diamond Sword', 'Made of diamonds', 8, 4, NULL),
-(2, 'Diamond Hoe', 'The most valuable gardening item', 7, 2, 2),
-(3, 'Emerald Sword', 'The sword carried by the wealthiest villagers', 10, 5, 1),
-(4, 'Steel Bow', 'Crafted from molten rock from the center of the Earth', 6, 20, 4),
-(5, 'Battle Axe', 'Stolen from the great vikings of the west', 12, 2, 3),
-(6, 'Throwing Dagger', 'Given by the assassins of the great creed', 5, 15, 3);
+INSERT INTO `Items` (`item_name`, `item_description`, `item_power`, `item_range`, `quest_id`) VALUES
+('Diamond Sword', 'Made of diamonds', 8, 4, NULL),
+('Diamond Hoe', 'The most valuable gardening item', 7, 2, 
+  (SELECT `quest_id` FROM `Quests` WHERE `quest_name` = 'Supreme gardening')),
+('Emerald Sword', 'The sword carried by the wealthiest villagers', 10, 5, 
+  (SELECT `quest_id` FROM `Quests` WHERE `quest_name` = 'Save the village')),
+('Steel Bow', 'Crafted from molten rock from the center of the Earth', 6, 20, 
+  (SELECT `quest_id` FROM `Quests` WHERE `quest_name` = 'Slay the wild beast')),
+('Battle Axe', 'Stolen from the great vikings of the west', 12, 2, 
+  (SELECT `quest_id` FROM `Quests` WHERE `quest_name` = 'Find the lost cave')),
+('Throwing Dagger', 'Given by the assassins of the great creed', 5, 15, 
+  (SELECT `quest_id` FROM `Quests` WHERE `quest_name` = 'Find the lost cave'));
 
 -- Inserting sample data into 'Character_has_Items' table
 INSERT INTO `Character_has_Items` (`character_id`, `item_id`) VALUES
-(1, 1),
-(1, 2),
-(3, 2);
+(
+  (SELECT `character_id` FROM `Characters` WHERE `character_name` = 'magic4Life'),
+  (SELECT `item_id` FROM `Items` WHERE `item_name` = 'Diamond Sword')
+),
+(
+  (SELECT `character_id` FROM `Characters` WHERE `character_name` = 'magic4Life'),
+  (SELECT `item_id` FROM `Items` WHERE `item_name` = 'Diamond Hoe')
+),
+(
+  (SELECT `character_id` FROM `Characters` WHERE `character_name` = 'simpleHuman29'),
+  (SELECT `item_id` FROM `Items` WHERE `item_name` = 'Diamond Hoe')
+);
 
 -- Inserting sample data into 'Chest_has_Items' table
 INSERT INTO `Chest_has_Items` (`chest_id`, `item_id`) VALUES
-(1, 1),
-(1, 3),
-(2, 1),
-(3, 2);
+(
+  1,
+  (SELECT `item_id` FROM `Items` WHERE `item_name` = 'Diamond Sword')
+),
+(
+  1,
+  (SELECT `item_id` FROM `Items` WHERE `item_name` = 'Emerald Sword')
+),
+(
+  2,
+  (SELECT `item_id` FROM `Items` WHERE `item_name` = 'Diamond Sword')
+),
+(
+  3,
+  (SELECT `item_id` FROM `Items` WHERE `item_name` = 'Diamond Hoe')
+);
 
 -- Display all table contents
 SELECT * FROM `Classes`;
