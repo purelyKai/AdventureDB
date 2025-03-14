@@ -17,6 +17,7 @@ const Quests = () => {
       name: "quest_description",
       label: "Description",
       type: "text",
+      optional: true,
     },
     {
       name: "character_id",
@@ -25,6 +26,7 @@ const Quests = () => {
       foreignKey: true,
       optionsEndpoint: "Characters",
       selectTarget: "character_name",
+      optional: true,
     },
   ];
 
