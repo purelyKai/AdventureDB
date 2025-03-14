@@ -7,4 +7,5 @@ export interface Field {
   optionsEndpoint?: string;
   selectTarget?: string;
   selectNone?: boolean;
+  unique?: boolean;
 }
