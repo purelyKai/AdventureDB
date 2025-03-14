@@ -12,11 +12,13 @@ const Chests = () => {
       name: "chest_x_coordinate",
       label: "X Coordinate",
       type: "number",
+      unique: true,
     },
     {
       name: "chest_y_coordinate",
       label: "Y Coordinate",
       type: "number",
+      unique: true,
     },
   ];
 
