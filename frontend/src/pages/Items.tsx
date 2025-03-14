@@ -12,6 +12,7 @@ const Items = () => {
       name: "item_name",
       label: "Name",
       type: "text",
+      unique: true,
     },
     {
       name: "item_description",

@@ -12,6 +12,7 @@ const Characters = () => {
       name: "character_name",
       label: "Name",
       type: "text",
+      unique: true,
     },
     {
       name: "class_id",
