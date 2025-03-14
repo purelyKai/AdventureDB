@@ -235,16 +235,8 @@ const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => {
 
   // Formats the label for a field
   const getFieldLabel = (field: Field) => {
-    var fieldLabel = field.label;
-
     // Add * if required field
-    if(!field.selectNone) {
-      fieldLabel += " *"
-    }
-    // Add unique if unique
-    if(field.unique) {
-      fieldLabel += " (unique)"
-    }
+    var fieldLabel = field.selectNone ? field.label : field.label + " *";
 
     return fieldLabel;
   };
