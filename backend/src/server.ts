@@ -8,7 +8,8 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || "8379";
 
-// List of allowed tables/endpoints
+// List of allowed tables/endpoints - this serves as a whitelist
+// for security and prevents accessing unauthorized database tables
 const ALLOWED_TABLES = [
   `Classes`,
   `Chests`,
@@ -19,7 +20,11 @@ const ALLOWED_TABLES = [
   `Chest_has_Items`,
 ];
 
-// Middleware for validating table names
+/**
+ * Middleware: Validates table names from request parameters
+ * Ensures we only allow access to predefined tables to prevent SQL injection
+ * and unauthorized access to other database tables
+ */
 const validateTableName = (req: Request, res: Response, next: NextFunction) => {
   const { endpoint } = req.params;
 
@@ -30,6 +35,7 @@ const validateTableName = (req: Request, res: Response, next: NextFunction) => {
   next();
 };
 
+// Enable CORS for all routes and parse JSON request bodies
 app.use(cors());
 app.use(express.json());
 
@@ -37,7 +43,10 @@ app.get("/", (_req: Request, res: Response) => {
   res.send("Express server is running");
 });
 
-// Fetch all records from a table
+/**
+ * GET Route: Fetch all records from a specific table
+ * Orders results by the table's primary key for consistent pagination
+ */
 app.get(
   "/api/:endpoint",
   validateTableName,
@@ -58,7 +67,11 @@ app.get(
   }
 );
 
-// Insert a new record
+/**
+ * POST Route: Create a new record in a specified table
+ * Dynamically builds the INSERT query based on the request body fields
+ * This allows flexible insertion without hardcoding column names
+ */
 app.post(
   "/api/:endpoint",
   validateTableName,
@@ -73,6 +86,7 @@ app.post(
           .json({ message: "Request body cannot be empty" });
       }
 
+      // Dynamically create the INSERT statement based on request body
       const columns = Object.keys(newRecord);
       const values = Object.values(newRecord);
       const placeholders = columns.map(() => "?").join(", ");
@@ -91,7 +105,11 @@ app.post(
   }
 );
 
-// Update a record by ID
+/**
+ * PUT Route: Update an existing record by ID
+ * Dynamically creates a parameterized UPDATE query to prevent SQL injection
+ * Handles partial updates by only modifying specified fields
+ */
 app.put(
   "/api/:endpoint/:id",
   validateTableName,
@@ -110,9 +128,11 @@ app.put(
       const columns = Object.keys(updatedRecord);
       const values = Object.values(updatedRecord);
 
+      // Create the SET clause for the UPDATE statement with placeholders
       const setClause = columns.map(() => "?? = ?").join(", ");
       const query = `UPDATE ?? SET ${setClause} WHERE ?? = ?`;
 
+      // Build params array with properly escaped values
       const params: any[] = [endpoint];
       columns.forEach((col, i) => {
         params.push(col, values[i]);
@@ -133,7 +153,10 @@ app.put(
   }
 );
 
-// Delete a record by ID
+/**
+ * DELETE Route: Remove a record by ID
+ * Uses parameterized queries to prevent SQL injection
+ */
 app.delete(
   "/api/:endpoint/:id",
   validateTableName,
@@ -161,29 +184,36 @@ app.delete(
   }
 );
 
-// Returns a string corresponding to the name of the primary key
-// column for the given endpoint
-function getPrimaryKeyColumn(endpoint: string)
-{
-  var primaryKeyColumn = '';
+/**
+ * Utility Function: Determines the primary key column name for a given table
+ *
+ * Logic:
+ * - For junction tables (containing '_'): use the table name + '_id'
+ * - For tables ending with 'es': remove 'es' and add '_id'
+ * - For other tables: remove the last character (assuming 's') and add '_id'
+ *
+ * This follows a naming convention where primary keys are singular_table_name_id
+ */
+function getPrimaryKeyColumn(endpoint: string) {
+  var primaryKeyColumn = "";
   var endpointLower = endpoint.toLowerCase();
 
   // If endpoint is an intersection table, key column is the name of the table
-  if(endpoint.includes('_')) {
+  if (endpoint.includes("_")) {
     primaryKeyColumn = endpointLower;
   }
+
   // If not an intersection table, remove plural values since key column isn't plural
-  else if(endpointLower.endsWith("es")) {
-    primaryKeyColumn = endpoint.slice(0, -2)
-  }
-  else {
+  else if (endpointLower.endsWith("es")) {
+    primaryKeyColumn = endpoint.slice(0, -2);
+  } else {
     primaryKeyColumn = endpoint.slice(0, -1);
   }
 
-  return primaryKeyColumn + '_id';
+  return primaryKeyColumn + "_id";
 }
 
-// Global error handler
+// Global error handler for uncaught exceptions
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   console.error("Server error:", err);
   res.status(500).json({ message: "Internal server error" });
