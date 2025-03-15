@@ -19,11 +19,11 @@ export const useApi = (endpoint: string) => {
    *
    * @returns Promise resolving to the fetched data or empty array on error
    */
-  const fetchData = useCallback(async () => {
+  const fetchData = useCallback(async (forDropdown: boolean) => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch(`${API_BASE_URL}/${endpoint}`);
+      const response = await fetch(`${API_BASE_URL}/${endpoint}/${forDropdown}`);
       if (!response.ok) {
         throw new Error("Network response was not ok");
       }
