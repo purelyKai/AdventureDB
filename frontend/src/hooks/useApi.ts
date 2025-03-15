@@ -19,25 +19,30 @@ export const useApi = (endpoint: string) => {
    *
    * @returns Promise resolving to the fetched data or empty array on error
    */
-  const fetchData = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const response = await fetch(`${API_BASE_URL}/${endpoint}`);
-      if (!response.ok) {
-        throw new Error("Network response was not ok");
+  const fetchData = useCallback(
+    async (forDropdown: boolean) => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const response = await fetch(
+          `${API_BASE_URL}/${endpoint}/${forDropdown}`
+        );
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        const data = await response.json();
+        setIsLoading(false);
+        return data;
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : "An unknown error occurred"
+        );
+        setIsLoading(false);
+        return [];
       }
-      const data = await response.json();
-      setIsLoading(false);
-      return data;
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "An unknown error occurred"
-      );
-      setIsLoading(false);
-      return [];
-    }
-  }, [endpoint]);
+    },
+    [endpoint]
+  );
 
   /**
    * Creates a new item at the specified endpoint

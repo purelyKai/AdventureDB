@@ -82,7 +82,7 @@ const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => {
     }));
 
   const loadData = useCallback(async () => {
-    const result = await fetchData();
+    const result = await fetchData(false);
     setData(result);
     setOriginalData(JSON.parse(JSON.stringify(result))); // Deep copy to keep original state
   }, [fetchData]);

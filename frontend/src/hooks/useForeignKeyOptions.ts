@@ -27,7 +27,7 @@ export const useForeignKeyOptions = (
      */
     const loadOptions = async () => {
       try {
-        const data = await fetchData();
+        const data = await fetchData(true);
 
         // Validate the response data
         if (!data || !Array.isArray(data) || data.length === 0) {

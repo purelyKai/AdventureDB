@@ -48,17 +48,20 @@ app.get("/", (_req: Request, res: Response) => {
  * Orders results by the table's primary key for consistent pagination
  */
 app.get(
-  "/api/:endpoint",
+  "/api/:endpoint/:forDropdown",
   validateTableName,
   async (req: Request, res: Response) => {
     try {
-      const { endpoint } = req.params;
+      const { endpoint, forDropdown } = req.params;
       console.log("Fetching from table:", endpoint);
 
-      const primaryKeyColumn = getPrimaryKeyColumn(endpoint);
+      const columnToOrderBy =
+        forDropdown == "true"
+          ? getIdentifyingColumn(endpoint)
+          : getPrimaryKeyColumn(endpoint);
       const query = `SELECT * FROM ?? ORDER BY ??`;
 
-      const [results] = await db.query(query, [endpoint, primaryKeyColumn]);
+      const [results] = await db.query(query, [endpoint, columnToOrderBy]);
       res.json(results);
     } catch (err) {
       console.error("Database query error:", err);
@@ -201,16 +204,31 @@ function getPrimaryKeyColumn(endpoint: string) {
   // If endpoint is an intersection table, key column is the name of the table
   if (endpoint.includes("_")) {
     primaryKeyColumn = endpointLower;
-  }
-
-  // If not an intersection table, remove plural values since key column isn't plural
-  else if (endpointLower.endsWith("es")) {
-    primaryKeyColumn = endpoint.slice(0, -2);
   } else {
-    primaryKeyColumn = endpoint.slice(0, -1);
+    primaryKeyColumn = removePlural(endpoint);
   }
 
   return primaryKeyColumn + "_id";
+}
+
+// Gets the identifying column for the given endpoint
+function getIdentifyingColumn(endpoint: string) {
+  const columnPrefix = removePlural(endpoint.toLocaleLowerCase());
+
+  if (endpoint == "Chests") {
+    return columnPrefix + "_id";
+  } else {
+    return columnPrefix + "_name";
+  }
+}
+
+// Removes plural ending on the given plural word
+function removePlural(word: string) {
+  if (word.endsWith("es")) {
+    return word.slice(0, -2);
+  } else {
+    return word.slice(0, -1);
+  }
 }
 
 // Global error handler for uncaught exceptions
