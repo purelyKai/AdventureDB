@@ -12,6 +12,7 @@ const Quests = () => {
       name: "quest_name",
       label: "Name",
       type: "text",
+      unique: true,
     },
     {
       name: "quest_description",

@@ -21,6 +21,46 @@ const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => {
   // Get the primary key field (assuming it's the first field)
   const primaryKeyField = fields[0];
 
+  // Determine what the error responses are for when there are issues
+  const getErrorResponses = () =>
+  {
+    // Find fields that must be unique
+    const uniqueFields = fields
+      .filter((field) => field.unique)
+      .map((field) => field.label.toLowerCase());
+    const uniqueFieldCount = uniqueFields.length;
+
+    // Set unique error response message depending on number of unique fields
+    var uniqueErrorResponse = "";
+
+    if(uniqueFieldCount > 0) {
+      uniqueErrorResponse += " Please ensure the ";
+
+      switch(uniqueFieldCount) {
+        case 1:
+          uniqueErrorResponse += uniqueFields[0] + " is unique.";
+          break;
+        case 2:
+          uniqueErrorResponse += uniqueFields[0] + " and " + uniqueFields[1] + " are unique.";
+          break;
+        default:
+          for(let i = 0; i < uniqueFieldCount - 1; i++) {
+            uniqueErrorResponse += uniqueFields[i] + ", ";
+          }
+          uniqueErrorResponse += "and " + uniqueFields[uniqueFieldCount - 1] + " are unique.";
+      }
+    }
+
+    // Append unique error response to each error's initial responses
+    const errorResponses = {
+      add: "The " + title.toLowerCase() + " couldn't be added." + uniqueErrorResponse,
+      edit: "The " + title.toLowerCase() + " couldn't be edited." + uniqueErrorResponse,
+    }
+    return errorResponses;
+  }
+  // Store error responses to issues
+  const errorResponses = getErrorResponses();
+
   // Call useForeignKeyOptions for all fields that are foreign keys
   const foreignKeyOptions = fields
     .filter((field) => field.foreignKey)
@@ -81,11 +121,15 @@ const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => {
     });
 
     if (id === -1) {
-      // Creating a new item
-      await createItem(processedItem);
+      // If item couldn't be created, show add error response
+      if((await createItem(processedItem)) == null) {
+        alert(errorResponses.add)
+      }
     } else {
-      // Editing an existing item
-      await updateItem(id, processedItem);
+      // If item couldn't be edited, show edit error response
+      if((await updateItem(id, processedItem)) == null) {
+        alert(errorResponses.edit)
+      }
     }
     setEditingId(null);
     setNewItem({});
@@ -99,14 +143,14 @@ const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => {
 
   const handleNewItemChange = (field: string, value: any) => {
     // Prevent empty string values from being set (from the placeholder)
-    if (value === "") return;
+    // if (value === "") return;
 
     setNewItem({ ...newItem, [field]: value });
   };
 
   const handleEditItemChange = (id: number, field: string, value: any) => {
     // Prevent empty string values from being set (from the placeholder)
-    if (value === "") return;
+    // if (value === "") return;
 
     const updatedData = data.map((item) =>
       item[primaryKeyField.name] === id ? { ...item, [field]: value } : item
@@ -189,6 +233,14 @@ const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => {
     return item[field.name];
   };
 
+  // Formats the label for a field
+  const getFieldLabel = (field: Field) => {
+    // Add * if required field
+    var fieldLabel = field.selectNone ? field.label : field.label + " *";
+
+    return fieldLabel;
+  };
+
   if (isLoading) {
     return <div>Loading...</div>;
   }
@@ -213,7 +265,7 @@ const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => {
             .map((field) => (
               <div key={field.name} className="mb-4">
                 <label className="block text-sm font-medium text-gray-700">
-                  {field.label}
+                  {getFieldLabel(field)}
                 </label>
                 {renderInputField(field, newItem[field.name], (value) =>
                   handleNewItemChange(field.name, value)

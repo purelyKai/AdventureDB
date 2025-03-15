@@ -12,6 +12,7 @@ const Classes = () => {
       name: "class_name",
       label: "Class Name",
       type: "text",
+      unique: true,
     },
     {
       name: "class_description",
