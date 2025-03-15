@@ -22,8 +22,7 @@ const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => {
   const primaryKeyField = fields[0];
 
   // Determine what the error responses are for when there are issues
-  const getErrorResponses = () =>
-  {
+  const getErrorResponses = () => {
     // Find fields that must be unique
     const uniqueFields = fields
       .filter((field) => field.unique)
@@ -33,31 +32,41 @@ const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => {
     // Set unique error response message depending on number of unique fields
     var uniqueErrorResponse = "";
 
-    if(uniqueFieldCount > 0) {
+    if (uniqueFieldCount > 0) {
       uniqueErrorResponse += " Please ensure the ";
 
-      switch(uniqueFieldCount) {
+      switch (uniqueFieldCount) {
         case 1:
           uniqueErrorResponse += uniqueFields[0] + " is unique.";
           break;
         case 2:
-          uniqueErrorResponse += uniqueFields[0] + " and " + uniqueFields[1] + " are unique.";
+          uniqueErrorResponse +=
+            uniqueFields[0] + " and " + uniqueFields[1] + " are unique.";
           break;
         default:
-          for(let i = 0; i < uniqueFieldCount - 1; i++) {
+          for (let i = 0; i < uniqueFieldCount - 1; i++) {
             uniqueErrorResponse += uniqueFields[i] + ", ";
           }
-          uniqueErrorResponse += "and " + uniqueFields[uniqueFieldCount - 1] + " are unique.";
+          uniqueErrorResponse +=
+            "and " + uniqueFields[uniqueFieldCount - 1] + " are unique.";
       }
     }
 
     // Append unique error response to each error's initial responses
     const errorResponses = {
-      add: "The " + title.toLowerCase() + " couldn't be added." + uniqueErrorResponse,
-      edit: "The " + title.toLowerCase() + " couldn't be edited." + uniqueErrorResponse,
-    }
+      add:
+        "The " +
+        title.toLowerCase() +
+        " couldn't be added." +
+        uniqueErrorResponse,
+      edit:
+        "The " +
+        title.toLowerCase() +
+        " couldn't be edited." +
+        uniqueErrorResponse,
+    };
     return errorResponses;
-  }
+  };
   // Store error responses to issues
   const errorResponses = getErrorResponses();
 
@@ -122,13 +131,13 @@ const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => {
 
     if (id === -1) {
       // If item couldn't be created, show add error response
-      if((await createItem(processedItem)) == null) {
-        alert(errorResponses.add)
+      if ((await createItem(processedItem)) == null) {
+        alert(errorResponses.add);
       }
     } else {
       // If item couldn't be edited, show edit error response
-      if((await updateItem(id, processedItem)) == null) {
-        alert(errorResponses.edit)
+      if ((await updateItem(id, processedItem)) == null) {
+        alert(errorResponses.edit);
       }
     }
     setEditingId(null);
@@ -181,7 +190,7 @@ const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => {
           onChange={(e) => onChange(e.target.value)}
           className="w-full p-2 border rounded"
           disabled={isReadOnly}
-          required={!field.selectNone} // Required unless "None" is an option
+          required={!field.selectNone && !field.optional} // Not required if selectNone or optional is true
         >
           {/* Non-selectable placeholder option */}
           <option value="" disabled className="text-gray-500">
@@ -206,6 +215,7 @@ const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => {
           onChange={(e) => onChange(e.target.value)}
           className="w-full p-2 border rounded"
           readOnly={isReadOnly}
+          required={!field.optional}
         />
       );
     }
@@ -236,7 +246,8 @@ const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => {
   // Formats the label for a field
   const getFieldLabel = (field: Field) => {
     // Add * if required field
-    var fieldLabel = field.selectNone ? field.label : field.label + " *";
+    var fieldLabel =
+      field.selectNone || field.optional ? field.label : field.label + " *";
 
     return fieldLabel;
   };

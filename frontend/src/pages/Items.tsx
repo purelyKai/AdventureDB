@@ -18,6 +18,7 @@ const Items = () => {
       name: "item_description",
       label: "Description",
       type: "text",
+      optional: true,
     },
     {
       name: "item_power",
@@ -28,6 +29,7 @@ const Items = () => {
       name: "item_range",
       label: "Range",
       type: "number",
+      optional: true,
     },
     {
       name: "quest_id",
@@ -37,6 +39,7 @@ const Items = () => {
       optionsEndpoint: "Quests",
       selectTarget: "quest_name",
       selectNone: true,
+      optional: true,
     },
   ];
 

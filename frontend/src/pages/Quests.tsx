@@ -18,6 +18,7 @@ const Quests = () => {
       name: "quest_description",
       label: "Description",
       type: "text",
+      optional: true,
     },
     {
       name: "character_id",
@@ -27,6 +28,7 @@ const Quests = () => {
       optionsEndpoint: "Characters",
       selectTarget: "character_name",
       selectNone: true,
+      optional: true,
     },
   ];
 

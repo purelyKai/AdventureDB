@@ -18,6 +18,7 @@ const Classes = () => {
       name: "class_description",
       label: "Description",
       type: "text",
+      optional: true,
     },
   ];
 

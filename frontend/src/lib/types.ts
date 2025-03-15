@@ -8,4 +8,5 @@ export interface Field {
   selectTarget?: string;
   selectNone?: boolean;
   unique?: boolean;
+  optional?: boolean;
 }
