@@ -1,3 +1,13 @@
+-- -----------------------------------------------------
+-- CS 340 - Portfolio Project Deliverables - DDL
+-- -----------------------------------------------------
+--  This file contains the data definition queries that
+--  are used to set up the database and insert the
+--  sample data for each table. The tables include
+--  classes, chests, characters, quests, items,
+--  character_has_items, and chest_has_items.
+-- -----------------------------------------------------
+
 -- Temporarily remove key checks and autocommit
 SET FOREIGN_KEY_CHECKS = 0;
 SET AUTOCOMMIT = 0;
@@ -11,6 +21,10 @@ DROP TABLE IF EXISTS `Items`;
 DROP TABLE IF EXISTS `Character_has_Items`;
 DROP TABLE IF EXISTS `Chest_has_Items`;
 
+
+-- -----------------------------------------------------
+-- CREATE each table (7x)
+-- -----------------------------------------------------
 -- -----------------------------------------------------
 -- Create Table `Classes`
 -- A class can be associated with many characters
@@ -24,8 +38,8 @@ CREATE TABLE IF NOT EXISTS `Classes` (
 
 -- -----------------------------------------------------
 -- Create Table `Chests`
--- A chest must have at least one item and there can
--- be duplicate items among chests
+-- A chest can have multiple items and there can be
+-- duplicate items among chests
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `Chests` (
   `chest_id` INT NOT NULL AUTO_INCREMENT,
@@ -39,7 +53,7 @@ CREATE TABLE IF NOT EXISTS `Chests` (
 -- Create Table `Characters`
 -- A character can have multiple items and multiple
 -- quests, but must have one class. There can be duplicate
--- items among characters, but not duplicate quests
+-- items and classes among characters, but not duplicate quests
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `Characters` (
   `character_id` INT NOT NULL AUTO_INCREMENT,
@@ -53,7 +67,7 @@ CREATE TABLE IF NOT EXISTS `Characters` (
 
 -- -----------------------------------------------------
 -- Create Table `Quests`
--- A quest must give at least one item and can be associated
+-- A quest can give multiple items and can be associated
 -- with a max of one character. There can't be duplicate item
 -- rewards among quests
 -- -----------------------------------------------------
@@ -72,7 +86,7 @@ CREATE TABLE IF NOT EXISTS `Quests` (
 -- Create Table `Items`
 -- An item can be associated with multiple characters and
 -- multiple chests, but can only be associated with a max
--- of 1 quest
+-- of one quest
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `Items` (
   `item_id` INT NOT NULL AUTO_INCREMENT,
@@ -106,10 +120,9 @@ CREATE TABLE IF NOT EXISTS `Character_has_Items` (
 );
 
 -- -----------------------------------------------------
--- Table `Chest_has_Items`
+-- Create Table `Chest_has_Items`
 -- Each entry must have a link to a chest and item,
--- but not every item will have an entry. Every chest must
--- have an entry since each chest must give at least one item.
+-- but not every chest and item will have an entry
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `Chest_has_Items` (
   `chest_has_items_id` INT NOT NULL AUTO_INCREMENT,
@@ -124,6 +137,9 @@ CREATE TABLE IF NOT EXISTS `Chest_has_Items` (
     ON UPDATE CASCADE
 );
 
+-- -----------------------------------------------------
+-- INSERT Sample Data into each table (7x)
+-- -----------------------------------------------------
 -- Inserting sample data into 'Classes' table
 INSERT INTO `Classes` (`class_name`, `class_description`) VALUES
 ('Wizard', 'Harness the power of magic and unleash your wrath'),
@@ -158,8 +174,7 @@ INSERT INTO `Items` (`item_name`, `item_description`, `item_power`, `item_range`
 ('Diamond Sword', 'Made of diamonds', 8, 4, NULL),
 ('Diamond Hoe', 'The most valuable gardening item', 7, 2, 
   (SELECT `quest_id` FROM `Quests` WHERE `quest_name` = 'Supreme gardening')),
-('Emerald Sword', 'The sword carried by the wealthiest villagers', 10, 5, 
-  (SELECT `quest_id` FROM `Quests` WHERE `quest_name` = 'Save the village')),
+('Emerald Sword', 'The sword carried by the wealthiest villagers', 10, 5, null),
 ('Steel Bow', 'Crafted from molten rock from the center of the Earth', 6, 20, 
   (SELECT `quest_id` FROM `Quests` WHERE `quest_name` = 'Slay the wild beast')),
 ('Battle Axe', 'Stolen from the great vikings of the west', 12, 2, 
@@ -195,10 +210,6 @@ INSERT INTO `Chest_has_Items` (`chest_id`, `item_id`) VALUES
 (
   2,
   (SELECT `item_id` FROM `Items` WHERE `item_name` = 'Diamond Sword')
-),
-(
-  3,
-  (SELECT `item_id` FROM `Items` WHERE `item_name` = 'Diamond Hoe')
 );
 
 -- Display all table contents
