@@ -1,5 +1,8 @@
 // reactServer.cjs
 // Uses common javascript to serve the react build folder (/dist)
+// Source: https://github.com/osu-cs340-ecampus/react-starter-app
+// Retrieved from: https://github.com/osu-cs340-ecampus/react-starter-app?tab=readme-ov-file#build-and-deploy
+// This file was adapted from Oregon State University's CS340 Ecampus React Starter Guide
 
 const express = require("express");
 const path = require("path");
