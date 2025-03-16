@@ -113,6 +113,29 @@ const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => {
     setEditingId(null);
   };
 
+  // Validate required fields are filled before saving
+  const validateItem = (item: any) => {
+    // Check that all required fields have values
+    const requiredFields = fields.filter(
+      (field) => !field.optional && !field.selectNone && !field.readOnly
+    );
+
+    for (const field of requiredFields) {
+      if (
+        item[field.name] === undefined ||
+        item[field.name] === "" ||
+        item[field.name] === null
+      ) {
+        return {
+          valid: false,
+          message: `${field.label} is required.`,
+        };
+      }
+    }
+
+    return { valid: true };
+  };
+
   const handleSave = async (id: number, item: any) => {
     // Process any "__none__" values to null before saving
     const processedItem = { ...item };
@@ -128,6 +151,13 @@ const CRUDTable: React.FC<CRUDTableProps> = ({ title, endpoint, fields }) => {
         processedItem[fieldName] = null;
       }
     });
+
+    // Validate the item before saving
+    const validation = validateItem(processedItem);
+    if (!validation.valid) {
+      alert(validation.message);
+      return;
+    }
 
     if (id === -1) {
       // If item couldn't be created, show add error response
