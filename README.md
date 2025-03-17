@@ -62,3 +62,11 @@ npm run start:prod
 - **Database**
 
   - MariaDB (MySQL)
+
+## Citations
+
+### `frontend/reactServer.cjs`
+
+- This file was adapted from Oregon State University's CS340 Ecampus React Starter Guide.
+- Source: https://github.com/osu-cs340-ecampus/react-starter-app
+- Retrieved from: https://github.com/osu-cs340-ecampus/react-starter-app?tab=readme-ov-file#build-and-deploy
